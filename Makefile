@@ -23,9 +23,9 @@ ifneq ($(SKIP_DOCKER),true)
 		--rm \
 		-e SKIP_DOCKER=true \
 		-e GITHUB_TOKEN=$${GITHUB_TOKEN} \
-		-e GOCACHE=/workspaces/brigade/.gocache \
-		-v $(PROJECT_ROOT):/workspaces/brigade \
-		-w /workspaces/brigade \
+		-e GOCACHE=/workspaces/brigade-prometheus/.gocache \
+		-v $(PROJECT_ROOT):/workspaces/brigade-prometheus \
+		-w /workspaces/brigade-prometheus \
 		$(GO_DEV_IMAGE)
 
 	KANIKO_IMAGE := brigadecore/kaniko:v0.2.0
@@ -35,8 +35,8 @@ ifneq ($(SKIP_DOCKER),true)
 		--rm \
 		-e SKIP_DOCKER=true \
 		-e DOCKER_PASSWORD=$${DOCKER_PASSWORD} \
-		-v $(PROJECT_ROOT):/workspaces/brigade \
-		-w /workspaces/brigade \
+		-v $(PROJECT_ROOT):/workspaces/brigade-prometheus \
+		-w /workspaces/brigade-prometheus \
 		$(KANIKO_IMAGE)
 
 	HELM_IMAGE := brigadecore/helm-tools:v0.1.0
@@ -46,8 +46,8 @@ ifneq ($(SKIP_DOCKER),true)
 		--rm \
 		-e SKIP_DOCKER=true \
 		-e HELM_PASSWORD=$${HELM_PASSWORD} \
-		-v $(PROJECT_ROOT):/workspaces/brigade \
-		-w /workspaces/brigade \
+		-v $(PROJECT_ROOT):/workspaces/brigade-prometheus \
+		-w /workspaces/brigade-prometheus \
 		$(HELM_IMAGE)
 endif
 
@@ -63,7 +63,7 @@ ifdef DOCKER_ORG
 	DOCKER_ORG := $(DOCKER_ORG)/
 endif
 
-DOCKER_IMAGE_PREFIX := $(DOCKER_REGISTRY)$(DOCKER_ORG)brigade2-
+DOCKER_IMAGE_PREFIX := $(DOCKER_REGISTRY)$(DOCKER_ORG)brigade-prometheus-
 
 ifdef HELM_REGISTRY
 	HELM_REGISTRY := $(HELM_REGISTRY)/
@@ -104,8 +104,8 @@ build-%:
 	$(KANIKO_DOCKER_CMD) kaniko \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg COMMIT=$(GIT_VERSION) \
-		--dockerfile /workspaces/brigade/v2/$*/Dockerfile \
-		--context dir:///workspaces/brigade/ \
+		--dockerfile /workspaces/brigade-prometheus/v2/$*/Dockerfile \
+		--context dir:///workspaces/brigade-prometheus/ \
 		--no-push
 
 ################################################################################
@@ -125,8 +125,8 @@ push-%:
 		kaniko \
 			--build-arg VERSION="$(VERSION)" \
 			--build-arg COMMIT="$(GIT_VERSION)" \
-			--dockerfile /workspaces/brigade/v2/$*/Dockerfile \
-			--context dir:///workspaces/brigade/ \
+			--dockerfile /workspaces/brigade-prometheus/v2/$*/Dockerfile \
+			--context dir:///workspaces/brigade-prometheus/ \
 			--destination $(DOCKER_IMAGE_PREFIX)$*:$(IMMUTABLE_DOCKER_TAG) \
 			--destination $(DOCKER_IMAGE_PREFIX)$*:$(MUTABLE_DOCKER_TAG) \
 	'
@@ -135,16 +135,16 @@ push-%:
 publish-chart:
 	$(HELM_DOCKER_CMD) sh	-c ' \
 		helm registry login $(HELM_REGISTRY) -u $(HELM_USERNAME) -p $${HELM_PASSWORD} && \
-		cd charts/brigade && \
+		cd charts/brigade-prometheus && \
 		helm dep up && \
 		sed -i "s/^version:.*/version: $(VERSION)/" Chart.yaml && \
 		sed -i "s/^appVersion:.*/appVersion: $(VERSION)/" Chart.yaml && \
-		helm chart save . $(HELM_CHART_PREFIX)brigade:$(VERSION) && \
-		helm chart push $(HELM_CHART_PREFIX)brigade:$(VERSION) \
+		helm chart save . $(HELM_CHART_PREFIX)brigade-prometheus:$(VERSION) && \
+		helm chart push $(HELM_CHART_PREFIX)brigade-prometheus:$(VERSION) \
 	'
 
 ################################################################################
-# Targets to facilitate hacking on Brigade.                                    #
+# Targets to facilitate hacking on Brigade Prometheus.                         #
 ################################################################################
 
 .PHONY: hack-new-kind-cluster
@@ -174,11 +174,11 @@ IMAGE_PULL_POLICY ?= Always
 
 .PHONY: hack-deploy
 hack-deploy:
-	kubectl get namespace brigade || kubectl create namespace brigade
-	helm dep up charts/brigade && \
-	helm upgrade brigade charts/brigade \
+	helm dep up charts/brigade-prometheus && \
+	helm upgrade brigade-prometheus charts/brigade-prometheus \
 		--install \
-		--namespace brigade \
+		--create-namespace \
+		--namespace brigade-prometheus \
 		--wait \
 		--timeout 600s \
 		--set prometheus.image.repository=$(DOCKER_IMAGE_PREFIX)prometheus \
