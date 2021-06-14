@@ -28,17 +28,6 @@ ifneq ($(SKIP_DOCKER),true)
 		-w /workspaces/brigade \
 		$(GO_DEV_IMAGE)
 
-	JS_DEV_IMAGE := node:14.16.0-stretch
-
-	JS_DOCKER_CMD := docker run \
-		-it \
-		--rm \
-		-e NPM_TOKEN=$${NPM_TOKEN} \
-		-e SKIP_DOCKER=true \
-		-v $(PROJECT_ROOT):/workspaces/brigade \
-		-w /workspaces/brigade \
-		$(JS_DEV_IMAGE)
-
 	KANIKO_IMAGE := brigadecore/kaniko:v0.2.0
 
 	KANIKO_DOCKER_CMD := docker run \
