@@ -88,6 +88,25 @@ IMMUTABLE_DOCKER_TAG := $(VERSION)
 # Tests                                                                        #
 ################################################################################
 
+.PHONY: lint
+lint:
+	$(GO_DOCKER_CMD) sh -c ' \
+		cd v2/exporter && \
+		golangci-lint run --config ../../golangci.yaml \
+	'
+
+.PHONY: test-unit
+test-unit:
+	$(GO_DOCKER_CMD) sh -c ' \
+		cd v2/exporter && \
+		go test \
+			-v \
+			-timeout=60s \
+			-race \
+			-coverprofile=coverage.txt \
+			-covermode=atomic \
+			./... \
+	'
 
 ################################################################################
 # Build                                                                        #
