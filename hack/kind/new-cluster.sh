@@ -22,6 +22,10 @@ nodes:
   extraPortMappings:
   - containerPort: 31600
     hostPort: 31600
+  - containerPort: 31700
+    hostPort: 31700
+  - containerPort: 31800
+    hostPort: 31800
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]
