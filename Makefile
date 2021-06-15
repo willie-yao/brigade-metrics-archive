@@ -116,7 +116,7 @@ test-unit:
 build: build-images
 
 .PHONY: build-images
-build-images: build-prometheus
+build-images: build-exporter build-prometheus build-grafana
 
 .PHONY: build-%
 build-%:
@@ -135,7 +135,7 @@ build-%:
 publish: push-images publish-chart
 
 .PHONY: push-images
-push-images: push-prometheus
+push-images: push-images push-prometheus push-grafana
 
 .PHONY: push-%
 push-%:
@@ -171,7 +171,7 @@ hack-new-kind-cluster:
 	hack/kind/new-cluster.sh
 
 .PHONY: hack-build-images
-hack-build-images: hack-build-prometheus
+hack-build-images: hack-build-exporter hack-build-prometheus hack-build-grafana
 
 .PHONY: hack-build-%
 hack-build-%:
@@ -183,7 +183,7 @@ hack-build-%:
 		.
 
 .PHONY: hack-push-images
-hack-push-images: hack-push-prometheus
+hack-push-images: hack-push-exporter hack-push-prometheus hack-push-grafana
 
 .PHONY: hack-push-%
 hack-push-%: hack-build-%
@@ -200,16 +200,22 @@ hack-deploy:
 		--namespace brigade-prometheus \
 		--wait \
 		--timeout 600s \
+		--set exporter.image.repository=$(DOCKER_IMAGE_PREFIX)prometheus \
+		--set exporter.image.tag=$(IMMUTABLE_DOCKER_TAG) \
+		--set exporter.image.pullPolicy=$(IMAGE_PULL_POLICY) \
 		--set prometheus.image.repository=$(DOCKER_IMAGE_PREFIX)prometheus \
 		--set prometheus.image.tag=$(IMMUTABLE_DOCKER_TAG) \
 		--set prometheus.image.pullPolicy=$(IMAGE_PULL_POLICY) \
+		--set grafana.image.repository=$(DOCKER_IMAGE_PREFIX)prometheus \
+		--set grafana.image.tag=$(IMMUTABLE_DOCKER_TAG) \
+		--set grafana.image.pullPolicy=$(IMAGE_PULL_POLICY)
 
 .PHONY: hack
 hack: hack-push-images hack-deploy
 
 # Convenience targets for loading images into a KinD cluster
 .PHONY: hack-load-images
-hack-load-images: load-prometheus
+hack-load-images: load-exporter load-prometheus load-grafana
 
 load-%:
 	@echo "Loading $(DOCKER_IMAGE_PREFIX)$*:$(IMMUTABLE_DOCKER_TAG)"
