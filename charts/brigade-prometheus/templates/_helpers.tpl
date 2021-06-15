@@ -21,15 +21,15 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{- define "brigade-prometheus.exporter.fullname" -}}
-{{ include "brigade-prometheus.fullname" . | printf "%s-apiserver" }}
+{{ include "brigade-prometheus.fullname" . | printf "%s-exporter" }}
 {{- end -}}
 
 {{- define "brigade-prometheus.prometheus.fullname" -}}
-{{ include "brigade-prometheus.fullname" . | printf "%s-scheduler" }}
+{{ include "brigade-prometheus.fullname" . | printf "%s-prometheus" }}
 {{- end -}}
 
 {{- define "brigade-prometheus.grafana.fullname" -}}
-{{ include "brigade-prometheus.fullname" . | printf "%s-observer" }}
+{{ include "brigade-prometheus.fullname" . | printf "%s-grafana" }}
 {{- end -}}
 
 {{/*
