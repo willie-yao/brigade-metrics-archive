@@ -20,8 +20,12 @@ nodes:
 - role: control-plane
   image: brigadecore/kind-node:v1.20.2
   extraPortMappings:
-  - containerPort: 31600
-    hostPort: 31600
+  - containerPort: 31700
+    hostPort: 31700
+  - containerPort: 31800
+    hostPort: 31800
+  - containerPort: 31900
+    hostPort: 31900
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]

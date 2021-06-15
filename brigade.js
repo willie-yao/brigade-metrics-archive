@@ -2,12 +2,11 @@
 // NOTE: This is a Brigade 1.x script for now.
 // ============================================================================
 
-const { Check, KindJob } = require("@brigadecore/brigade-utils");
+const { Check } = require("@brigadecore/brigade-utils");
 
 const releaseTagRegex = /^refs\/tags\/(v[0-9]+(?:\.[0-9]+)*(?:\-.+)?)$/;
 
 const goImg = "brigadecore/go-tools:v0.1.0";
-const jsImg = "node:14.6.0-stretch";
 const kanikoImg = "brigadecore/kaniko:v0.2.0";
 const helmImg = "brigadecore/helm-tools:v0.1.0";
 const localPath = "/workspaces/brigade";
@@ -47,9 +46,31 @@ const jobs = {};
 
 // Basic tests:
 
-// Brigadier:
+const testUnitJobName = "test-unit";
+const testUnitJob = (e, p) => {
+  return new MakeTargetJob(testUnitJobName, goImg, e);
+}
+jobs[testUnitJobName] = testUnitJob;
+
+const lintJobName = "lint";
+const lintJob = (e, p) => {
+  return new MakeTargetJob(lintJobName, goImg, e);
+}
+jobs[lintJobName] = lintJob;
 
 // Docker images:
+
+const buildExporterJobName = "build-exporter";
+const buildExporterJob = (e, p) => {
+  return new MakeTargetJob(buildExporterJobName, kanikoImg, e);
+}
+jobs[buildExporterJobName] = buildExporterJob;
+
+const pushExporterJobName = "push-exporter";
+const pushExporterJob = (e, p) => {
+  return new PushImageJob(pushExporterJobName, e, p);
+}
+jobs[pushExporterJobName] = pushExporterJob;
 
 const buildPrometheusJobName = "build-prometheus";
 const buildPrometheusJob = (e, p) => {
@@ -62,6 +83,18 @@ const pushPrometheusJob = (e, p) => {
   return new PushImageJob(pushPrometheusJobName, e, p);
 }
 jobs[pushPrometheusJobName] = pushPrometheusJob;
+
+const buildGrafanaJobName = "build-grafana";
+const buildGrafanaJob = (e, p) => {
+  return new MakeTargetJob(buildGrafanaJobName, kanikoImg, e);
+}
+jobs[buildGrafanaJobName] = buildGrafanaJob;
+
+const pushGrafanaJobName = "push-grafana";
+const pushGrafanaJob = (e, p) => {
+  return new PushImageJob(pushGrafanaJobName, e, p);
+}
+jobs[pushGrafanaJobName] = pushGrafanaJob;
 
 // Helm chart:
 
@@ -82,8 +115,6 @@ const publishChartJob = (e, p) => {
 }
 jobs[publishChartJobName] = publishChartJob;
 
-// CLI:
-
 // Run the entire suite of tests, builds, etc. concurrently WITHOUT publishing
 // anything initially. If EVERYTHING passes AND this was a push (merge,
 // presumably) to the v2 branch, then run jobs to publish "edge" images.
@@ -95,15 +126,21 @@ function runSuite(e, p) {
   //
   // Ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#Promise.all_fail-fast_behaviour
   return Promise.all([
+    // Basic tests:
+    run(e, p, testUnitJob(e, p)).catch((err) => { return err }),
+    run(e, p, lintJob(e, p)).catch((err) => { return err }),
+    // Docker images:
+    run(e, p, buildExporterJob(e, p)).catch((err) => { return err }),
     run(e, p, buildPrometheusJob(e, p)).catch((err) => { return err }),
+    run(e, p, buildGrafanaJob(e, p)).catch((err) => { return err }),
     // Helm chart:
-    run(e, p, lintChartJob(e, p)).catch((err) => { return err }),
+    run(e, p, lintChartJob(e, p)).catch((err) => { return err })
   ]).then((values) => {
     values.forEach((value) => {
       if (value instanceof Error) throw value;
     });
   }).then(() => {
-    if (e.revision.ref == "v2") {
+    if (e.revision.ref == "master") {
       // Push "edge" images.
       //
       // npm packages MUST be semantically versioned, so we DON'T publish an
@@ -112,7 +149,9 @@ function runSuite(e, p) {
       // To keep our github released page tidy, we're also not publishing "edge"
       // CLI binaries.
       Promise.all([
-        run(e, p, pushPrometheusJob(e, p)).catch((err) => { return err })
+        run(e, p, pushExporterJob(e, p)).catch((err) => { return err }),
+        run(e, p, pushPrometheusJob(e, p)).catch((err) => { return err }),
+        run(e, p, pushGrafanaJob(e, p)).catch((err) => { return err })
       ]).then((values) => {
         values.forEach((value) => {
           if (value instanceof Error) throw value;
@@ -159,7 +198,9 @@ events.on("push", (e, p) => {
   if (matchStr) {
     // This is an official release with a semantically versioned tag
     return Group.runAll([
-      pushPrometheusJob(e, p)
+      pushExporterJob(e, p),
+      pushPrometheusJob(e, p),
+      pushGrafanaJob(e, p)
     ])
     .then(() => {
       // All images built and published successfully, so build and publish the
