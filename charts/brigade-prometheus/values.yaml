@@ -16,9 +16,9 @@ exporter:
   brigade:
     ## Address of your Brigade 2 API server, including leading protocol
     ## (http:// or https://)
-    apiAddress: https://brigade-apiserver.brigade.svc.cluster.local
+    apiAddress: https://brigade2-apiserver.brigade2.svc.cluster.local
     ## API token belonging to a Brigade 2 service account
-    apiToken: Placeholder
+    apiToken: api-token
     ## Whether to ignore cert warning from the API server
     apiIgnoreCertWarnings: true
 
@@ -60,6 +60,11 @@ prometheus:
   
   arguments: ['-p', '9090:9090', '-v', "/v2/prometheus/prometheus.yml:/workspaces/brigade-prometheus", "prom/prometheus"]
 
+  config:
+    path: '/v2/prometheus/prometheus.yml:/workspaces/brigade-prometheus'
+  
+  exporterUrl: 'https://brigade-prometheus-exporter.brigade-prometheus.svc.cluster.local'
+
   resources: {}
     # We usually recommend not to specify default resources and to leave this as
     # a conscious choice for the user. This also increases chances charts run on
@@ -81,10 +86,10 @@ prometheus:
     enabled: true
 
   service:
-    type: LoadBalancer
+    type: NodePort
     ## Host port the service will be mapped to when service type is either
     ## NodePort or LoadBalancer. If not specified, Kubernetes chooses.
-    # nodePort: 31800
+    nodePort: 31800
 
 grafana:
 

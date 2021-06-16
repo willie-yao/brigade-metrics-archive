@@ -26,7 +26,23 @@ spec:
         imagePullPolicy: {{ .Values.prometheus.image.pullPolicy }}
         ports:
         - containerPort: 9090
-      {{- with .Values.prometheus.nodeSelector }}
+        args:
+        - "--config.file=/etc/prometheus/prometheus.yml"
+        - "--storage.tsdb.path=/prometheus/"
+        volumeMounts:
+        - name: prometheus-config-volume
+          mountPath: /etc/prometheus/
+        - name: prometheus-storage-volume
+          mountPath: /prometheus/
+      # {{- with .Values.prometheus.nodeSelector }}
+      volumes:
+      - name: prometheus-config-volume
+        configMap:
+          defaultMode: 420
+          name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+
+      - name: prometheus-storage-volume
+        emptyDir: {}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}

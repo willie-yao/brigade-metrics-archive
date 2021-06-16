@@ -16,6 +16,6 @@ scrape_configs:
     scrape_interval: 2s
 
     static_configs:
-      - targets: ['localhost:2112']
+      - targets: ['https://brigade-prometheus-exporter.brigade-prometheus.svc.cluster.local']
         labels:
-          group: 'brigade'
+          group: 'exporter'

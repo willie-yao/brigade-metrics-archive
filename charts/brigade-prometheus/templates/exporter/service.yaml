@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "brigade-prometheus.exporter.fullname" . }}
+  labels:
+    {{- include "brigade-prometheus.labels" . | nindent 4 }}
+    {{- include "brigade-prometheus.exporter.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.exporter.service.type }}
+  ports:
+  {{- if .Values.exporter.tls.enabled }}
+  - port: 2112
+  {{- else }}
+  - port: 80
+  {{- end }}
+    targetPort: 8080
+    {{- if and (or (eq .Values.exporter.service.type "NodePort") (eq .Values.exporter.service.type "LoadBalancer")) .Values.exporter.service.nodePort}}
+    nodePort: {{ .Values.exporter.service.nodePort }}
+    {{- end }}
+    protocol: TCP
+  selector:
+    {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
+    {{- include "brigade-prometheus.exporter.labels" . | nindent 8 }}

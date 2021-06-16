@@ -13,6 +13,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/willie-yao/brigade-prometheus/v2/exporter/internal/os"
 	//"github.com/willie-yao/brigade-prometheus/v2/exporter/internal/os"
 )
 
@@ -94,16 +95,16 @@ func main() {
 
 	// The address of the Brigade 2 API server
 	// beginning with http:// or https//
-	// apiAddress, err := os.GetRequiredEnvVar("API_ADDRESS")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	apiAddress, err := os.GetRequiredEnvVar("API_ADDRESS")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// An API token obtained using the Brigade 2 CLI
-	// apiToken, err := os.GetRequiredEnvVar("API_TOKEN")
-	// if err != nil {
-	// 	log.Println(err)
-	// }
+	apiToken, err := os.GetRequiredEnvVar("API_TOKEN")
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Boolean indicating whether or not to ignore SSL errors
 	// certWarning, err := os.GetBoolFromEnvVar("API_IGNORE_CERT_WARNINGS", true)
@@ -113,8 +114,8 @@ func main() {
 
 	// Instantiate the API Client
 	client := sdk.NewAPIClient(
-		"https://localhost:8443",
-		"Placeholder",
+		apiAddress,
+		apiToken,
 		&restmachinery.APIClientOptions{
 			AllowInsecureConnections: true,
 		},

@@ -143,7 +143,7 @@ build-%:
 publish: push-images publish-chart
 
 .PHONY: push-images
-push-images: push-images push-prometheus push-grafana
+push-images: push-exporter push-prometheus push-grafana
 
 .PHONY: push-prometheus
 push-prometheus:
@@ -187,13 +187,6 @@ hack-new-kind-cluster:
 .PHONY: hack-build-images
 hack-build-images: hack-build-exporter hack-build-grafana hack-pull-prometheus
 
-.PHONY: hack-run-prometheus
-hack-run-prometheus:
-	docker run \
-		-p 9090:9090 \
-		-v /v2/prometheus/prometheus.yml:/workspaces/brigade-prometheus \
-		prom/prometheus
-
 .PHONY: hack-pull-prometheus
 hack-pull-prometheus:
 	docker pull prom/prometheus:$(DOCKER_IMAGE_PREFIX)$*:$(VERSION)
@@ -224,7 +217,7 @@ hack-deploy:
 		--create-namespace \
 		--namespace brigade-prometheus \
 		--wait \
-		--timeout 120s \
+		--timeout 60s \
 		--set exporter.image.repository=$(DOCKER_IMAGE_PREFIX)exporter \
 		--set exporter.image.tag=$(IMMUTABLE_DOCKER_TAG) \
 		--set exporter.image.pullPolicy=$(IMAGE_PULL_POLICY) \
