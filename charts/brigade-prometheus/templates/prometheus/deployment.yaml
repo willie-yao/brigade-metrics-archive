@@ -19,7 +19,6 @@ spec:
       annotations:
         checksum/secret: {{ include (print $.Template.BasePath "/prometheus/secret.yaml") . | sha256sum }}
     spec:
-      serviceAccount: {{ include "brigade-prometheus.prometheus.fullname" . }}
       containers:
       - name: prometheus
         image: {{ .Values.prometheus.image.repository }}:{{ default .Chart.AppVersion .Values.prometheus.image.tag }}

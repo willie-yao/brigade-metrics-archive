@@ -19,7 +19,6 @@ spec:
       annotations:
         checksum/secret: {{ include (print $.Template.BasePath "/exporter/secret.yaml") . | sha256sum }}
     spec:
-      serviceAccount: {{ include "brigade-prometheus.exporter.fullname" . }}
       containers:
       - name: exporter
         image: {{ .Values.exporter.image.repository }}:{{ default .Chart.AppVersion .Values.exporter.image.tag }}
