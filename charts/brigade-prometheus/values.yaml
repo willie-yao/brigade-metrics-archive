@@ -39,6 +39,9 @@ exporter:
 
   tolerations: []
 
+  tls:
+    enabled: true
+
   service:
     type: ClusterIP
     ## Host port the service will be mapped to when service type is either
@@ -49,11 +52,13 @@ exporter:
 prometheus:
 
   image:
-    repository: quillie/brigade-prometheus-prometheus
+    repository: prom/prometheus
     ## tag should only be specified if you want to override Chart.appVersion
     ## The default tag is the value of .Chart.AppVersion
-    # tag:
+    tag: latest
     pullPolicy: IfNotPresent
+  
+  arguments: ['-p', '9090:9090', '-v', "/v2/prometheus/prometheus.yml:/workspaces/brigade-prometheus", "prom/prometheus"]
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as
@@ -72,8 +77,11 @@ prometheus:
 
   tolerations: []
 
+  tls:
+    enabled: true
+
   service:
-    type: ClusterIP
+    type: LoadBalancer
     ## Host port the service will be mapped to when service type is either
     ## NodePort or LoadBalancer. If not specified, Kubernetes chooses.
     # nodePort: 31800

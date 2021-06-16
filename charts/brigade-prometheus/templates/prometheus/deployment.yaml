@@ -1,1 +1,36 @@
-Placeholder
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+  labels:
+    {{- include "brigade-prometheus.labels" . | nindent 4 }}
+    {{- include "brigade-prometheus.prometheus.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
+      {{- include "brigade-prometheus.prometheus.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
+        {{- include "brigade-prometheus.prometheus.labels" . | nindent 8 }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/prometheus/secret.yaml") . | sha256sum }}
+    spec:
+      serviceAccount: {{ include "brigade-prometheus.prometheus.fullname" . }}
+      containers:
+      - name: prometheus
+        image: {{ .Values.prometheus.image.repository }}:{{ default .Chart.AppVersion .Values.prometheus.image.tag }}
+        imagePullPolicy: {{ .Values.prometheus.image.pullPolicy }}
+        ports:
+        - containerPort: 9090
+      {{- with .Values.prometheus.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.prometheus.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

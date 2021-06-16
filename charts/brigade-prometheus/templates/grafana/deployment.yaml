@@ -1,1 +1,34 @@
-Placeholder
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "brigade-prometheus.grafana.fullname" . }}
+  labels:
+    {{- include "brigade-prometheus.labels" . | nindent 4 }}
+    {{- include "brigade-prometheus.grafana.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
+      {{- include "brigade-prometheus.grafana.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
+        {{- include "brigade-prometheus.grafana.labels" . | nindent 8 }}
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/grafana/secret.yaml") . | sha256sum }}
+    spec:
+      serviceAccount: {{ include "brigade-prometheus.grafana.fullname" . }}
+      containers:
+      - name: grafana
+        image: {{ .Values.grafana.image.repository }}:{{ default .Chart.AppVersion .Values.grafana.image.tag }}
+        imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
+      {{- with .Values.grafana.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.grafana.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

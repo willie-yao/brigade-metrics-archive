@@ -26,14 +26,14 @@ spec:
         imagePullPolicy: {{ .Values.exporter.image.pullPolicy }}
         env:
         - name: API_ADDRESS
-          value: {{ include "brigade-prometheus.exporter.brigade.apiAddress" . }}
+          value: {{ .Values.exporter.brigade.apiAddress }}
         - name: API_TOKEN
           valueFrom:
             secretKeyRef:
               name: {{ include "brigade-prometheus.exporter.fullname" . }}
-              key: {{ include "brigade-prometheus.exporter.brigade.apiToken" . }}
+              key: {{ .Values.exporter.brigade.apiToken }}
         - name: API_IGNORE_CERT_WARNINGS
-          value: {{ quote (and .Values.apiserver.tls.enabled .Values.exporter.tls.ignoreCertWarnings) }}
+          value: {{ quote (and .Values.exporter.tls.enabled .Values.exporter.brigade.ignoreCertWarnings) }}
       {{- with .Values.exporter.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

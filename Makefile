@@ -145,6 +145,12 @@ publish: push-images publish-chart
 .PHONY: push-images
 push-images: push-images push-prometheus push-grafana
 
+.PHONY: push-prometheus
+push-prometheus:
+	docker login $(DOCKER_REGISTRY) -u $(DOCKER_USERNAME) -p $${DOCKER_PASSWORD} && \
+	docker tag prom/prometheus $(DOCKER_IMAGE_PREFIX)prometheus && \
+	docker push $(DOCKER_IMAGE_PREFIX)prometheus
+
 .PHONY: push-%
 push-%:
 	$(KANIKO_DOCKER_CMD) sh -c ' \
@@ -179,13 +185,24 @@ hack-new-kind-cluster:
 	hack/kind/new-cluster.sh
 
 .PHONY: hack-build-images
-hack-build-images: hack-build-exporter hack-build-prometheus hack-build-grafana
+hack-build-images: hack-build-exporter hack-build-grafana hack-pull-prometheus
+
+.PHONY: hack-run-prometheus
+hack-run-prometheus:
+	docker run \
+		-p 9090:9090 \
+		-v /v2/prometheus/prometheus.yml:/workspaces/brigade-prometheus \
+		prom/prometheus
+
+.PHONY: hack-pull-prometheus
+hack-pull-prometheus:
+	docker pull prom/prometheus:$(DOCKER_IMAGE_PREFIX)$*:$(VERSION)
 
 .PHONY: hack-build-%
 hack-build-%:
 	docker build \
 		-f v2/$*/Dockerfile \
-		-t $(DOCKER_IMAGE_PREFIX)$*:$(IMMUTABLE_DOCKER_TAG) \
+		-t $(DOCKER_IMAGE_PREFIX)$*:$(VERSION) \
 		--build-arg VERSION='$(VERSION)' \
 		--build-arg COMMIT='$(GIT_VERSION)' \
 		.
@@ -207,16 +224,17 @@ hack-deploy:
 		--create-namespace \
 		--namespace brigade-prometheus \
 		--wait \
-		--timeout 600s \
-		--set exporter.image.repository=$(DOCKER_IMAGE_PREFIX)prometheus \
+		--timeout 120s \
+		--set exporter.image.repository=$(DOCKER_IMAGE_PREFIX)exporter \
 		--set exporter.image.tag=$(IMMUTABLE_DOCKER_TAG) \
 		--set exporter.image.pullPolicy=$(IMAGE_PULL_POLICY) \
 		--set prometheus.image.repository=$(DOCKER_IMAGE_PREFIX)prometheus \
 		--set prometheus.image.tag=$(IMMUTABLE_DOCKER_TAG) \
 		--set prometheus.image.pullPolicy=$(IMAGE_PULL_POLICY) \
-		--set grafana.image.repository=$(DOCKER_IMAGE_PREFIX)prometheus \
+		--set grafana.image.repository=$(DOCKER_IMAGE_PREFIX)grafana \
 		--set grafana.image.tag=$(IMMUTABLE_DOCKER_TAG) \
-		--set grafana.image.pullPolicy=$(IMAGE_PULL_POLICY)
+		--set grafana.image.pullPolicy=$(IMAGE_PULL_POLICY) \
+		
 
 .PHONY: hack
 hack: hack-push-images hack-deploy

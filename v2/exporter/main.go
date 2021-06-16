@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	runningJobs = promauto.NewGauge(prometheus.GaugeOpts{
+	totalRunningJobs = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "brigade_running_jobs_total",
 		Help: "The total number of processed events",
 	})
@@ -25,6 +25,11 @@ var (
 	totalPendingWorkers = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "brigade_pending_workers_total",
 		Help: "The total number of pending workers",
+	})
+
+	totalFailedWorkers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_failed_workers_total",
+		Help: "The total number of failed workers",
 	})
 
 	// pendingWorkersByProject = promauto.NewGaugeVec(prometheus.GaugeOpts{
@@ -41,7 +46,7 @@ func recordMetrics(client sdk.APIClient) {
 			if err != nil {
 				log.Println(err)
 			}
-			runningJobs.Set(float64(tempRunningJobs.Count))
+			totalRunningJobs.Set(float64(tempRunningJobs.Count))
 
 			pendingEventsList, err := client.Core().Events().List(
 				context.Background(),
@@ -56,6 +61,20 @@ func recordMetrics(client sdk.APIClient) {
 
 			totalPendingWorkers.Set(float64(len(pendingEventsList.Items) +
 				int(pendingEventsList.RemainingItemCount)))
+
+			failedEventsList, err := client.Core().Events().List(
+				context.Background(),
+				&core.EventsSelector{
+					WorkerPhases: []core.WorkerPhase{core.WorkerPhaseFailed},
+				},
+				&meta.ListOptions{},
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			totalFailedWorkers.Set(float64(len(failedEventsList.Items) +
+				int(failedEventsList.RemainingItemCount)))
 
 			// Initialize vec
 			// for projectID, workerList := range workerMapByProjectID {
