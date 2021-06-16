@@ -103,26 +103,26 @@ func main() {
 	// An API token obtained using the Brigade 2 CLI
 	apiToken, err := os.GetRequiredEnvVar("API_TOKEN")
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	// Boolean indicating whether or not to ignore SSL errors
-	// certWarning, err := os.GetBoolFromEnvVar("API_IGNORE_CERT_WARNINGS", true)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
+	apiIgnoreCertWarnings, err := os.GetBoolFromEnvVar("API_IGNORE_CERT_WARNINGS", true)
+	if err != nil {
+		log.Println(err)
+	}
 
 	// Instantiate the API Client
 	client := sdk.NewAPIClient(
 		apiAddress,
 		apiToken,
 		&restmachinery.APIClientOptions{
-			AllowInsecureConnections: true,
+			AllowInsecureConnections: apiIgnoreCertWarnings,
 		},
 	)
 
 	recordMetrics(client)
 
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":8080", nil)
 }

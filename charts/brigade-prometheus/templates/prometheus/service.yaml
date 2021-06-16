@@ -8,12 +8,8 @@ metadata:
 spec:
   type: {{ .Values.prometheus.service.type }}
   ports:
-  {{- if .Values.prometheus.tls.enabled }}
-  - port: 9090
-  {{- else }}
   - port: 80
-  {{- end }}
-    targetPort: 8080
+    targetPort: 9090
     {{- if and (or (eq .Values.prometheus.service.type "NodePort") (eq .Values.prometheus.service.type "LoadBalancer")) .Values.prometheus.service.nodePort}}
     nodePort: {{ .Values.prometheus.service.nodePort }}
     {{- end }}
