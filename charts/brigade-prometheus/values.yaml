@@ -40,7 +40,7 @@ exporter:
   tolerations: []
 
   tls:
-    enabled: true
+    enabled: false
 
   service:
     type: ClusterIP
@@ -63,7 +63,7 @@ prometheus:
   config:
     path: '/v2/prometheus/prometheus.yml:/workspaces/brigade-prometheus'
   
-  exporterUrl: 'https://brigade-prometheus-exporter.brigade-prometheus.svc.cluster.local'
+  exporterUrl: brigade-prometheus-exporter.brigade-prometheus.svc.cluster.local:80
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as

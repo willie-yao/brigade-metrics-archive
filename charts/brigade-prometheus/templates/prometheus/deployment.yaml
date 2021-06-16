@@ -34,7 +34,6 @@ spec:
           mountPath: /etc/prometheus/
         - name: prometheus-storage-volume
           mountPath: /prometheus/
-      # {{- with .Values.prometheus.nodeSelector }}
       volumes:
       - name: prometheus-config-volume
         configMap:
@@ -43,6 +42,7 @@ spec:
 
       - name: prometheus-storage-volume
         emptyDir: {}
+      {{- with .Values.prometheus.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}

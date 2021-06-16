@@ -14,6 +14,8 @@ RUN go build \
   -ldflags "-w -X github.com/willie-yao/brigade-prometheus/v2/exporter/internal/version.version=$VERSION -X github.com/willie-yao/brigade-prometheus/v2/exporter/internal/version.commit=$COMMIT" \
   ./exporter
 
+EXPOSE 80
+
 FROM scratch
 COPY --from=0 /src/bin/ /brigade-prometheus/bin/
 ENTRYPOINT ["/brigade-prometheus/bin/exporter"]
