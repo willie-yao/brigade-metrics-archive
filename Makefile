@@ -185,11 +185,15 @@ hack-new-kind-cluster:
 	hack/kind/new-cluster.sh
 
 .PHONY: hack-build-images
-hack-build-images: hack-build-exporter hack-build-grafana hack-pull-prometheus
+hack-build-images: hack-build-exporter hack-pull-grafana hack-pull-prometheus
 
 .PHONY: hack-pull-prometheus
 hack-pull-prometheus:
 	docker pull prom/prometheus:$(DOCKER_IMAGE_PREFIX)$*:$(VERSION)
+
+.PHONY: hack-pull-grafana
+hack-pull-prometheus:
+	docker pull grafana/grafana:$(DOCKER_IMAGE_PREFIX)$*:$(VERSION)
 
 .PHONY: hack-build-%
 hack-build-%:

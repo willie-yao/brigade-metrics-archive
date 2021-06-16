@@ -81,10 +81,10 @@ prometheus:
 grafana:
 
   image:
-    repository: quillie/brigade-prometheus-grafana
+    repository: grafana/grafana
     ## tag should only be specified if you want to override Chart.appVersion
     ## The default tag is the value of .Chart.AppVersion
-    # tag:
+    tag: latest
     pullPolicy: IfNotPresent
 
   ingress:
