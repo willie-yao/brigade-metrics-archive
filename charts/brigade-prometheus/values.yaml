@@ -54,13 +54,6 @@ prometheus:
     ## The default tag is the value of .Chart.AppVersion
     tag: latest
     pullPolicy: IfNotPresent
-  
-  arguments: ['-p', '9090:9090', '-v', "/v2/prometheus/prometheus.yml:/workspaces/brigade-prometheus", "prom/prometheus"]
-
-  config:
-    path: '/v2/prometheus/prometheus.yml:/workspaces/brigade-prometheus'
-  
-  exporterUrl: brigade-prometheus-exporter.brigade-prometheus.svc.cluster.local:80
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as
@@ -80,10 +73,10 @@ prometheus:
   tolerations: []
 
   service:
-    type: NodePort
+    type: ClusterIP
     ## Host port the service will be mapped to when service type is either
     ## NodePort or LoadBalancer. If not specified, Kubernetes chooses.
-    nodePort: 31800
+    # nodePort: 31800
 
 grafana:
 

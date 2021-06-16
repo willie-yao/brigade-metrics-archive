@@ -36,9 +36,7 @@ spec:
       volumes:
       - name: prometheus-config-volume
         configMap:
-          defaultMode: 420
           name: {{ include "brigade-prometheus.prometheus.fullname" . }}
-
       - name: prometheus-storage-volume
         emptyDir: {}
       {{- with .Values.prometheus.nodeSelector }}
