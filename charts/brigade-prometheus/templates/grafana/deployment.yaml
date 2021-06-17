@@ -25,10 +25,16 @@ spec:
         image: {{ .Values.grafana.image.repository }}:{{ default .Chart.AppVersion .Values.grafana.image.tag }}
         imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
         volumeMounts:
+        - name: grafana-config-volume
+          mountPath: /etc/grafana/
         - name: grafana-datasources-volume
           mountPath: /etc/grafana/provisioning/datasources
+        - name: grafana-dashboard-config-volume
+          mountPath: /etc/grafana/provisioning/dashboards
         - name: grafana-storage
           mountPath: /var/lib/grafana
+        - name: grafana-dashboards-volume
+          mountPath: /var/lib/grafana/dashboards
         ports:
         - containerPort: 3000
           name: http-grafana
@@ -45,9 +51,18 @@ spec:
         - name: grafana-storage
           mountPath:  /var/lib/grafana
       volumes:
+      - name: grafana-config-volume
+        configMap:
+          name: {{ include "brigade-prometheus.grafana.fullname" . }}-config
       - name: grafana-datasources-volume
         configMap:
           name: {{ include "brigade-prometheus.grafana.fullname" . }}-datasources
+      - name: grafana-dashboard-config-volume
+        configMap:
+          name: {{ include "brigade-prometheus.grafana.fullname" . }}-dashboard-config
+      - name: grafana-dashboards-volume
+        configMap:
+          name: {{ include "brigade-prometheus.grafana.fullname" . }}-dashboards
       - name: grafana-storage
         persistentVolumeClaim:
           claimName: pvc-{{ include "brigade-prometheus.grafana.fullname" . }}
