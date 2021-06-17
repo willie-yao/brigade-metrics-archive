@@ -16,5 +16,5 @@ data:
       type: prometheus
       access: proxy
       isDefault: true
-      url: http://{{ include "brigade-prometheus.prometheus.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:9090
+      url: http://{{ include "brigade-prometheus.prometheus.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
 
