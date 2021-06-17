@@ -28,6 +28,10 @@ spec:
           mountPath: /etc/grafana/provisioning/datasources
         - name: grafana-storage
           mountPath: /var/lib/grafana
+        ports:
+        - containerPort: 3000
+          name: http-grafana
+          protocol: TCP
       volumes:
       - name: grafana-datasources-volume
         configMap:
