@@ -33,12 +33,24 @@ spec:
         - containerPort: 3000
           name: http-grafana
           protocol: TCP
+      initContainers:
+      - name: grafana-data-permission-fix
+        image: alpine:3
+        command:
+        - chown
+        - -R
+        - 472:472
+        - /var/lib/grafana
+        volumeMounts:
+        - name: grafana-storage
+          mountPath:  /var/lib/grafana
       volumes:
       - name: grafana-datasources-volume
         configMap:
           name: {{ include "brigade-prometheus.grafana.fullname" . }}-datasources
       - name: grafana-storage
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: pvc-{{ include "brigade-prometheus.grafana.fullname" . }}
       {{- with .Values.grafana.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
