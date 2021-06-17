@@ -17,7 +17,6 @@ spec:
         {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
         {{- include "brigade-prometheus.prometheus.labels" . | nindent 8 }}
       annotations:
-        checksum/secret: {{ include (print $.Template.BasePath "/prometheus/secret.yaml") . | sha256sum }}
         checksum/configmap: {{ include (print $.Template.BasePath "/prometheus/configmap.yaml") . | sha256sum }}
     spec:
       containers:
