@@ -11,6 +11,7 @@ data:
     # config file version
     apiVersion: 1
 
+    # datasources
     datasources:
     - name: Brigade-metrics
       type: prometheus
