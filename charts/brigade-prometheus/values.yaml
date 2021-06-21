@@ -87,6 +87,12 @@ grafana:
     tag: latest
     pullPolicy: IfNotPresent
 
+  auth:
+    ## Specify whether or not to use a reverse proxy + shared admin account
+    proxy: true
+    proxyUsername: willie
+    proxyPassword: test
+
   ingress:
     ## Whether to enable ingress. By default, this is disabled. Enabling ingress
     ## is advanced usage.
@@ -149,3 +155,36 @@ grafana:
     ## Host port the service will be mapped to when service type is either
     ## NodePort or LoadBalancer. If not specified, Kubernetes chooses.
     # nodePort: 31900
+
+## All settings for the nginx server
+nginx:
+
+  image:
+    repository: nginx
+    ## tag should only be specified if you want to override Chart.appVersion
+    ## The default tag is the value of .Chart.AppVersion
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as
+    # a conscious choice for the user. This also increases chances charts run on
+    # environments with little resources, such as Minikube. If you do want to
+    # specify resources, uncomment the following lines, adjust them as
+    # necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  service:
+    type: ClusterIP
+    ## Host port the service will be mapped to when service type is either
+    ## NodePort or LoadBalancer. If not specified, Kubernetes chooses.
+    # nodePort: 31800

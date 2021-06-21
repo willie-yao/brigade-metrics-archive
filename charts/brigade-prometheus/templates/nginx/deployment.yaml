@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "brigade-prometheus.nginx.fullname" . }}
+  labels:
+    {{- include "brigade-prometheus.labels" . | nindent 4 }}
+    {{- include "brigade-prometheus.nginx.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
+      {{- include "brigade-prometheus.nginx.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
+        {{- include "brigade-prometheus.nginx.labels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: nginx
+        image: {{ .Values.nginx.image.repository }}:{{ default .Chart.AppVersion .Values.nginx.image.tag }}
+        imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+      {{- with .Values.nginx.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

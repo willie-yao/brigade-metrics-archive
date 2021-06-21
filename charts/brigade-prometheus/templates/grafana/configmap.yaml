@@ -59,6 +59,15 @@ data:
     # Path to the default home dashboard. If this value is empty, then Grafana uses StaticRootPath + "dashboards/home.json"
     default_home_dashboard_path = /var/lib/grafana/dashboards/brigade.json
 
+    {{- if .Values.grafana.auth.proxy }}
+    [auth.proxy]
+    enabled = true
+    auto_sign_up = false
+    
+    [users]
+    allow_sign_up = false
+    {{- end }}
+
 ---
 
 apiVersion: v1

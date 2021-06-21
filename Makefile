@@ -185,7 +185,7 @@ hack-new-kind-cluster:
 	hack/kind/new-cluster.sh
 
 .PHONY: hack-build-images
-hack-build-images: hack-build-exporter hack-pull-grafana hack-pull-prometheus
+hack-build-images: hack-build-exporter hack-pull-grafana hack-pull-prometheus hack-build-nginx
 
 .PHONY: hack-pull-prometheus
 hack-pull-prometheus:
@@ -205,7 +205,7 @@ hack-build-%:
 		.
 
 .PHONY: hack-push-images
-hack-push-images: hack-push-exporter hack-push-prometheus hack-push-grafana
+hack-push-images: hack-push-exporter hack-push-prometheus hack-push-grafana hack-push-nginx
 
 .PHONY: hack-push-%
 hack-push-%: hack-build-%
@@ -231,6 +231,9 @@ hack-deploy:
 		--set grafana.image.repository=$(DOCKER_IMAGE_PREFIX)grafana \
 		--set grafana.image.tag=$(IMMUTABLE_DOCKER_TAG) \
 		--set grafana.image.pullPolicy=$(IMAGE_PULL_POLICY) \
+		--set nginx.image.repository=$(DOCKER_IMAGE_PREFIX)nginx \
+		--set nginx.image.tag=$(IMMUTABLE_DOCKER_TAG) \
+		--set nginx.image.pullPolicy=$(IMAGE_PULL_POLICY) \
 		
 
 .PHONY: hack
@@ -238,7 +241,7 @@ hack: hack-push-images hack-deploy
 
 # Convenience targets for loading images into a KinD cluster
 .PHONY: hack-load-images
-hack-load-images: load-exporter load-prometheus load-grafana
+hack-load-images: load-exporter load-prometheus load-grafana load-nginx
 
 load-%:
 	@echo "Loading $(DOCKER_IMAGE_PREFIX)$*:$(IMMUTABLE_DOCKER_TAG)"
