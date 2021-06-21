@@ -1,1 +1,61 @@
-Placeholder
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+  labels:
+    {{- include "brigade-prometheus.labels" . | nindent 4 }}
+    {{- include "brigade-prometheus.prometheus.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
+      {{- include "brigade-prometheus.prometheus.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
+        {{- include "brigade-prometheus.prometheus.labels" . | nindent 8 }}
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/prometheus/configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: prometheus
+        image: {{ .Values.prometheus.image.repository }}:{{ default .Chart.AppVersion .Values.prometheus.image.tag }}
+        imagePullPolicy: {{ .Values.prometheus.image.pullPolicy }}
+        ports:
+        - containerPort: 9090
+        args:
+        - "--config.file=/etc/prometheus/prometheus.yml"
+        - "--storage.tsdb.path=/prometheus/"
+        volumeMounts:
+        - name: prometheus-config-volume
+          mountPath: /etc/prometheus/
+        - name: prometheus-storage-volume
+          mountPath: /prometheus/
+      initContainers:
+      - name: prometheus-data-permission-fix
+        image: alpine:3
+        command:
+        - chown
+        - -R
+        - 65534:65534
+        - /prometheus/
+        volumeMounts:
+        - name: prometheus-storage-volume
+          mountPath:  /prometheus/
+      volumes:
+      - name: prometheus-config-volume
+        configMap:
+          name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+      - name: prometheus-storage-volume
+        persistentVolumeClaim:
+          claimName: pvc-{{ include "brigade-prometheus.prometheus.fullname" . }}
+      {{- with .Values.prometheus.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.prometheus.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

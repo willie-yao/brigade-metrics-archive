@@ -1,1 +1,75 @@
-Placeholder
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "brigade-prometheus.grafana.fullname" . }}
+  labels:
+    {{- include "brigade-prometheus.labels" . | nindent 4 }}
+    {{- include "brigade-prometheus.grafana.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
+      {{- include "brigade-prometheus.grafana.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
+        {{- include "brigade-prometheus.grafana.labels" . | nindent 8 }}
+      annotations:
+        checksum/configmap: {{ include (print $.Template.BasePath "/grafana/configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: grafana
+        image: {{ .Values.grafana.image.repository }}:{{ default .Chart.AppVersion .Values.grafana.image.tag }}
+        imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
+        volumeMounts:
+        - name: grafana-config-volume
+          mountPath: /etc/grafana/
+        - name: grafana-datasources-volume
+          mountPath: /etc/grafana/provisioning/datasources
+        - name: grafana-dashboard-config-volume
+          mountPath: /etc/grafana/provisioning/dashboards
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        - name: grafana-dashboards-volume
+          mountPath: /var/lib/grafana/dashboards
+        ports:
+        - containerPort: 3000
+          name: http-grafana
+          protocol: TCP
+      initContainers:
+      - name: grafana-data-permission-fix
+        image: alpine:3
+        command:
+        - chown
+        - -R
+        - 472:472
+        - /var/lib/grafana
+        volumeMounts:
+        - name: grafana-storage
+          mountPath:  /var/lib/grafana
+      volumes:
+      - name: grafana-config-volume
+        configMap:
+          name: {{ include "brigade-prometheus.grafana.fullname" . }}-config
+      - name: grafana-datasources-volume
+        configMap:
+          name: {{ include "brigade-prometheus.grafana.fullname" . }}-datasources
+      - name: grafana-dashboard-config-volume
+        configMap:
+          name: {{ include "brigade-prometheus.grafana.fullname" . }}-dashboard-config
+      - name: grafana-dashboards-volume
+        configMap:
+          name: {{ include "brigade-prometheus.grafana.fullname" . }}-dashboards
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: pvc-{{ include "brigade-prometheus.grafana.fullname" . }}
+      {{- with .Values.grafana.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.grafana.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
