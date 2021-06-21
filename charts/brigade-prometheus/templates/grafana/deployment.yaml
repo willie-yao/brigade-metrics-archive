@@ -38,6 +38,16 @@ spec:
         - containerPort: 3000
           name: http-grafana
           protocol: TCP
+      - name: nginx
+        image: {{ .Values.nginx.image.repository }}:{{ default .Chart.AppVersion .Values.nginx.image.tag }}
+        imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/
+        ports:
+        - containerPort: 80
+          name: nginx-grafana
+          protocol: TCP
       initContainers:
       - name: grafana-data-permission-fix
         image: alpine:3
@@ -50,6 +60,9 @@ spec:
         - name: grafana-storage
           mountPath:  /var/lib/grafana
       volumes:
+      - name: nginx-config-volume
+        configMap:
+          name: {{ include "brigade-prometheus.nginx.fullname" . }}
       - name: grafana-config-volume
         configMap:
           name: {{ include "brigade-prometheus.grafana.fullname" . }}-config

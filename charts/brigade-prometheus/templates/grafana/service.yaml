@@ -9,7 +9,7 @@ spec:
   type: {{ .Values.grafana.service.type }}
   ports:
   - port: 80
-    targetPort: 3000
+    targetPort: 80
     {{- if and (or (eq .Values.grafana.service.type "NodePort") (eq .Values.grafana.service.type "LoadBalancer")) .Values.grafana.service.nodePort}}
     nodePort: {{ .Values.grafana.service.nodePort }}
     {{- end }}
