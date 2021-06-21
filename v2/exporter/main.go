@@ -14,7 +14,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/willie-yao/brigade-prometheus/v2/exporter/internal/os"
-	//"github.com/willie-yao/brigade-prometheus/v2/exporter/internal/os"
 )
 
 var (
@@ -32,11 +31,6 @@ var (
 		Name: "brigade_failed_workers_total",
 		Help: "The total number of failed workers",
 	})
-
-	// pendingWorkersByProject = promauto.NewGaugeVec(prometheus.GaugeOpts{
-	// 	Name: "brigade_pending_workers_by_project",
-	// 	Help: "The number of pending workers by project",
-	// }, []string{"projectID"})
 )
 
 func recordMetrics(client sdk.APIClient) {
@@ -77,21 +71,12 @@ func recordMetrics(client sdk.APIClient) {
 			totalFailedWorkers.Set(float64(len(failedEventsList.Items) +
 				int(failedEventsList.RemainingItemCount)))
 
-			// Initialize vec
-			// for projectID, workerList := range workerMapByProjectID {
-			// 	pendingWorkersByProject.With(
-			// 		prometheus.Labels{"projectID": projectID},
-			// 	).Set(float64(len(workerList)))
-			// }
-
 			time.Sleep(2 * time.Second)
 		}
 	}()
 }
 
 func main() {
-
-	// TODO: Uncomment these env variable declarations
 
 	// The address of the Brigade 2 API server
 	// beginning with http:// or https//
