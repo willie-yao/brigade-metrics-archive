@@ -6,9 +6,9 @@ metadata:
     {{- include "brigade-prometheus.labels" . | nindent 4 }}
     {{- include "brigade-prometheus.prometheus.labels" . | nindent 4 }}
 spec:  
-  storageClassName: manual  
+  storageClassName: {{ .Values.prometheus.volumes.storageClass }}
   accessModes:
-   - ReadWriteMany
+   - {{ .Values.prometheus.volumes.accessMode }}
   resources:
    requests:   
      storage: 1Gi

@@ -32,6 +32,10 @@ If release name contains chart name it will be used as a full name.
 {{ include "brigade-prometheus.fullname" . | printf "%s-grafana" }}
 {{- end -}}
 
+{{- define "brigade-prometheus.nginx.fullname" -}}
+{{ include "brigade-prometheus.fullname" . | printf "%s-nginx" }}
+{{- end -}}
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}
@@ -69,6 +73,10 @@ app.kubernetes.io/component: prometheus
 
 {{- define "brigade-prometheus.grafana.labels" -}}
 app.kubernetes.io/component: grafana
+{{- end -}}
+
+{{- define "brigade-prometheus.nginx.labels" -}}
+app.kubernetes.io/component: nginx
 {{- end -}}
 
 {{- define "call-nested" }}
