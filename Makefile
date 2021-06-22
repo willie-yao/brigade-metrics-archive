@@ -221,7 +221,7 @@ hack-deploy:
 		--create-namespace \
 		--namespace brigade-prometheus \
 		--wait \
-		--timeout 60s \
+		--timeout 30s \
 		--set exporter.image.repository=$(DOCKER_IMAGE_PREFIX)exporter \
 		--set exporter.image.tag=$(IMMUTABLE_DOCKER_TAG) \
 		--set exporter.image.pullPolicy=$(IMAGE_PULL_POLICY) \
