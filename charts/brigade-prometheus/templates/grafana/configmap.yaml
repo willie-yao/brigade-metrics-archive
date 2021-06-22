@@ -20,10 +20,14 @@ data:
 
             location / {
               proxy_pass http://localhost:3000/;
-              proxy_max_temp_file_size 0;
+              auth_basic           "Administrator’s Area";
+              auth_basic_user_file /etc/nginx/.htpasswd; 
             }
         }
     }
+  
+  .htpasswd: |-
+    {{ htpasswd .Values.grafana.auth.proxyUsername .Values.grafana.auth.proxyPassword }}
 
 ---
 
@@ -91,10 +95,6 @@ data:
     {{- if .Values.grafana.auth.proxy }}
     [auth.anonymous]
     enabled = true
-    
-    [auth.proxy]
-    enabled = true
-    auto_sign_up = false
     
     [users]
     allow_sign_up = false
