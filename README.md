@@ -63,7 +63,7 @@ Save the file, and run `make hack` from the project's root directory.
 Once all three pods of the project are up and running, run the following command to expose the Grafana frontend:
 
 ```console
-$ kubectl port-forward <brigade-prometheus-grafana pod name> 3000:<3000 for option 1, 80 for option 2> -n brigade-prometheus
+$ kubectl port-forward service/brigade-prometheus-grafana 3000:<3000 for option 1, 80 for option 2> -n brigade-prometheus
 ```
 
 Enter your supplied credentials. You can now access the Grafana dashboard!
