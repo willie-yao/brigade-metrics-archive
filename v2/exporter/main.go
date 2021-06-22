@@ -22,6 +22,16 @@ var (
 		Help: "The total number of processed events",
 	})
 
+	totalStartingWorkers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_starting_workers_total",
+		Help: "The total number of starting workers",
+	})
+
+	totalRunningWorkers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_running_workers_total",
+		Help: "The total number of running workers",
+	})
+
 	totalPendingWorkers = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "brigade_pending_workers_total",
 		Help: "The total number of pending workers",
@@ -30,6 +40,36 @@ var (
 	totalFailedWorkers = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "brigade_failed_workers_total",
 		Help: "The total number of failed workers",
+	})
+
+	totalAbortedWorkers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_aborted_workers_total",
+		Help: "The total number of aborted workers",
+	})
+
+	totalCanceledWorkers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_canceled_workers_total",
+		Help: "The total number of canceled workers",
+	})
+
+	totalSucceededWorkers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_succeeded_workers_total",
+		Help: "The total number of succeeded workers",
+	})
+
+	totalTimedOutWorkers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_timed_out_workers_total",
+		Help: "The total number of timed-out workers",
+	})
+
+	totalSchedulingFailedWorkers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_scheduling_failed_workers_total",
+		Help: "The total number of scheduling-failed workers",
+	})
+
+	totalUnknownWorkers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_unknown_workers_total",
+		Help: "The total number of unknown workers",
 	})
 )
 
@@ -43,37 +83,36 @@ func recordMetrics(client sdk.APIClient) {
 			}
 			totalRunningJobs.Set(float64(tempRunningJobs.Count))
 
-			pendingEventsList, err := client.Core().Events().List(
-				context.Background(),
-				&core.EventsSelector{
-					WorkerPhases: []core.WorkerPhase{core.WorkerPhasePending},
-				},
-				&meta.ListOptions{},
-			)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			totalPendingWorkers.Set(float64(len(pendingEventsList.Items) +
-				int(pendingEventsList.RemainingItemCount)))
-
-			failedEventsList, err := client.Core().Events().List(
-				context.Background(),
-				&core.EventsSelector{
-					WorkerPhases: []core.WorkerPhase{core.WorkerPhaseFailed},
-				},
-				&meta.ListOptions{},
-			)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			totalFailedWorkers.Set(float64(len(failedEventsList.Items) +
-				int(failedEventsList.RemainingItemCount)))
+			recordWorkerGaugeMetric(client, totalStartingWorkers, core.WorkerPhaseStarting)
+			recordWorkerGaugeMetric(client, totalRunningWorkers, core.WorkerPhaseRunning)
+			recordWorkerGaugeMetric(client, totalPendingWorkers, core.WorkerPhasePending)
+			recordWorkerGaugeMetric(client, totalFailedWorkers, core.WorkerPhaseFailed)
+			recordWorkerGaugeMetric(client, totalAbortedWorkers, core.WorkerPhaseAborted)
+			recordWorkerGaugeMetric(client, totalCanceledWorkers, core.WorkerPhaseCanceled)
+			recordWorkerGaugeMetric(client, totalSucceededWorkers, core.WorkerPhaseSucceeded)
+			recordWorkerGaugeMetric(client, totalTimedOutWorkers, core.WorkerPhaseTimedOut)
+			recordWorkerGaugeMetric(client, totalSchedulingFailedWorkers, core.WorkerPhaseSchedulingFailed)
+			recordWorkerGaugeMetric(client, totalUnknownWorkers, core.WorkerPhaseUnknown)
 
 			time.Sleep(2 * time.Second)
 		}
 	}()
+}
+
+func recordWorkerGaugeMetric(client sdk.APIClient, gauge prometheus.Gauge, phase core.WorkerPhase) {
+	eventList, err := client.Core().Events().List(
+		context.Background(),
+		&core.EventsSelector{
+			WorkerPhases: []core.WorkerPhase{phase},
+		},
+		&meta.ListOptions{},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gauge.Set(float64(len(eventList.Items) +
+		int(eventList.RemainingItemCount)))
 }
 
 func main() {
