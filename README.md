@@ -53,8 +53,8 @@ Save the service account token somewhere safe.
 Since this add-on is still in heavy development, you will need to clone this repository to install Brigade Prometheus into your local Kubernetes cluster. Once the repository is cloned, open the `values.yaml` file, and paste the service account token into the `exporter.brigade.apiToken` field.
 
 There are two methods of authentication you can choose from for logging into Grafana. 
-    1. Option to use Grafana's built in user management system. The username and password for the admin account are specified in the `grafana.auth` fields, and the admin can handle user management using the Grafana UI.
-    2. Option to use an nginx reverse proxy and a shared username/password to access Grafana in anonymous mode.
+1. Option to use Grafana's built in user management system. The username and password for the admin account are specified in the `grafana.auth` fields, and the admin can handle user management using the Grafana UI.
+2. Option to use an nginx reverse proxy and a shared username/password to access Grafana in anonymous mode.
 
 For option 1, set `grafana.auth.proxy` to false in `values.yaml`, and true for option 2.
 
