@@ -8,8 +8,13 @@ metadata:
 spec:
   type: {{ .Values.grafana.service.type }}
   ports:
+    {{- if .Values.grafana.auth.proxy }}
   - port: 80
     targetPort: 80
+    {{- else }}
+  - port: 3000
+    targetPort: 3000
+    {{- end }}
     {{- if and (or (eq .Values.grafana.service.type "NodePort") (eq .Values.grafana.service.type "LoadBalancer")) .Values.grafana.service.nodePort}}
     nodePort: {{ .Values.grafana.service.nodePort }}
     {{- end }}
