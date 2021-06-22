@@ -28,7 +28,7 @@ data:
     }
   
   .htpasswd: |-
-    {{ htpasswd .Values.grafana.auth.proxyUsername .Values.grafana.auth.proxyPassword }}
+    {{ htpasswd .Values.grafana.auth.username .Values.grafana.auth.password }}
 
 ---
 
@@ -99,6 +99,11 @@ data:
     
     [users]
     allow_sign_up = false
+    {{- else }}
+    [security]
+    admin_user = {{ .Values.grafana.auth.username }}
+    admin_password = {{ .Values.grafana.auth.password }}
+
     {{- end }}
 
 ---

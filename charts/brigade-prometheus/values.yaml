@@ -94,8 +94,8 @@ grafana:
   auth:
     ## Specify whether or not to use a reverse proxy + shared admin account
     proxy: true
-    proxyUsername: willie
-    proxyPassword: test
+    username: willie
+    password: test
   
   volumes:
     storageClass: standard
