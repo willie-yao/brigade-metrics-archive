@@ -52,7 +52,7 @@ prometheus:
     repository: prom/prometheus
     ## tag should only be specified if you want to override Chart.appVersion
     ## The default tag is the value of .Chart.AppVersion
-    tag: latest
+    tag: v2.28.0
     pullPolicy: IfNotPresent
 
   resources: {}
@@ -72,6 +72,10 @@ prometheus:
 
   tolerations: []
 
+  volumes:
+    storageClass: standard
+    accessMode: ReadWriteOnce
+
   service:
     type: ClusterIP
     ## Host port the service will be mapped to when service type is either
@@ -84,7 +88,7 @@ grafana:
     repository: grafana/grafana
     ## tag should only be specified if you want to override Chart.appVersion
     ## The default tag is the value of .Chart.AppVersion
-    tag: latest
+    tag: 8.0.3
     pullPolicy: IfNotPresent
 
   auth:
@@ -92,6 +96,10 @@ grafana:
     proxy: true
     proxyUsername: willie
     proxyPassword: test
+  
+  volumes:
+    storageClass: standard
+    accessMode: ReadWriteOnce
 
   ingress:
     ## Whether to enable ingress. By default, this is disabled. Enabling ingress
@@ -163,7 +171,7 @@ nginx:
     repository: nginx
     ## tag should only be specified if you want to override Chart.appVersion
     ## The default tag is the value of .Chart.AppVersion
-    tag: latest
+    tag: 1.20.1-alpine
     pullPolicy: IfNotPresent
 
   resources: {}

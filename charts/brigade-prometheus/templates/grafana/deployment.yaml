@@ -18,7 +18,6 @@ spec:
         {{- include "brigade-prometheus.grafana.labels" . | nindent 8 }}
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/grafana/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/grafana/secret.yaml") . | sha256sum }}
     spec:
       containers:
       - name: grafana
