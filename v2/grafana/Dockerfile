@@ -1,3 +1,11 @@
 FROM grafana/grafana:8.0.2
 
-COPY v2/grafana/assets/images/ /usr/share/grafana/public/img/
+ENV GF_PATHS_DATA=/var/lib/grafana/data
+ENV GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/brigade.json
+ENV GF_USERS_ALLOW_SIGN_UP=false
+
+
+# TODO: Not sure if the license permits this. Run this by CELA.
+COPY v2/grafana/images/ /usr/share/grafana/public/img/
+
+COPY v2/grafana/dashboards/ /var/lib/grafana/dashboards/
