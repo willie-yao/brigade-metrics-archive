@@ -33,17 +33,6 @@ spec:
           mountPath: /etc/prometheus/
         - name: prometheus-storage-volume
           mountPath: /prometheus/
-      initContainers:
-      - name: prometheus-data-permission-fix
-        image: alpine:3
-        command:
-        - chown
-        - -R
-        - 65534:65534
-        - /prometheus/
-        volumeMounts:
-        - name: prometheus-storage-volume
-          mountPath:  /prometheus/
       volumes:
       - name: prometheus-config-volume
         configMap:

@@ -124,7 +124,7 @@ lint-chart:
 build: build-images
 
 .PHONY: build-images
-build-images: build-exporter build-prometheus build-grafana
+build-images: build-exporter build-grafana
 
 .PHONY: build-%
 build-%:
@@ -143,13 +143,7 @@ build-%:
 publish: push-images publish-chart
 
 .PHONY: push-images
-push-images: push-exporter push-prometheus push-grafana
-
-.PHONY: push-prometheus
-push-prometheus:
-	docker login $(DOCKER_REGISTRY) -u $(DOCKER_USERNAME) -p $${DOCKER_PASSWORD} && \
-	docker tag prom/prometheus $(DOCKER_IMAGE_PREFIX)prometheus && \
-	docker push $(DOCKER_IMAGE_PREFIX)prometheus
+push-images: push-exporter push-grafana
 
 .PHONY: push-%
 push-%:
@@ -185,15 +179,7 @@ hack-new-kind-cluster:
 	hack/kind/new-cluster.sh
 
 .PHONY: hack-build-images
-hack-build-images: hack-build-exporter hack-pull-grafana hack-pull-prometheus
-
-.PHONY: hack-pull-prometheus
-hack-pull-prometheus:
-	docker pull prom/prometheus:$(DOCKER_IMAGE_PREFIX)$*:$(VERSION)
-
-.PHONY: hack-pull-grafana
-hack-pull-prometheus:
-	docker pull grafana/grafana:$(DOCKER_IMAGE_PREFIX)$*:$(VERSION)
+hack-build-images: hack-build-exporter hack-pull-grafana
 
 .PHONY: hack-build-%
 hack-build-%:
@@ -205,7 +191,7 @@ hack-build-%:
 		.
 
 .PHONY: hack-push-images
-hack-push-images: hack-push-exporter hack-push-prometheus hack-push-grafana
+hack-push-images: hack-push-exporter hack-push-grafana
 
 .PHONY: hack-push-%
 hack-push-%: hack-build-%
@@ -225,20 +211,16 @@ hack-deploy:
 		--set exporter.image.repository=$(DOCKER_IMAGE_PREFIX)exporter \
 		--set exporter.image.tag=$(IMMUTABLE_DOCKER_TAG) \
 		--set exporter.image.pullPolicy=$(IMAGE_PULL_POLICY) \
-		--set prometheus.image.repository=$(DOCKER_IMAGE_PREFIX)prometheus \
-		--set prometheus.image.tag=$(IMMUTABLE_DOCKER_TAG) \
-		--set prometheus.image.pullPolicy=$(IMAGE_PULL_POLICY) \
 		--set grafana.image.repository=$(DOCKER_IMAGE_PREFIX)grafana \
 		--set grafana.image.tag=$(IMMUTABLE_DOCKER_TAG) \
-		--set grafana.image.pullPolicy=$(IMAGE_PULL_POLICY) \
-		
+		--set grafana.image.pullPolicy=$(IMAGE_PULL_POLICY)
 
 .PHONY: hack
 hack: hack-push-images hack-deploy
 
 # Convenience targets for loading images into a KinD cluster
 .PHONY: hack-load-images
-hack-load-images: load-exporter load-prometheus load-grafana
+hack-load-images: load-exporter load-grafana
 
 load-%:
 	@echo "Loading $(DOCKER_IMAGE_PREFIX)$*:$(IMMUTABLE_DOCKER_TAG)"

@@ -24,17 +24,28 @@ spec:
       - name: grafana
         image: {{ .Values.grafana.image.repository }}:{{ default .Chart.AppVersion .Values.grafana.image.tag }}
         imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
+        env:
+        {{- if .Values.grafana.auth.proxy }}
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: "true"
+        - name: GF_AUTH_DISABLE_LOGIN_FORM
+          value: "true"
+        {{- end }}
+        - name: GF_SECURITY_ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "brigade-prometheus.grafana.fullname" . }}
+              key: adminUsername
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "brigade-prometheus.grafana.fullname" . }}
+              key: adminPassword
         volumeMounts:
-        - name: grafana-config-volume
-          mountPath: /etc/grafana/
-        - name: grafana-datasources-volume
+        - name: grafana-datasources
           mountPath: /etc/grafana/provisioning/datasources
-        - name: grafana-dashboard-config-volume
-          mountPath: /etc/grafana/provisioning/dashboards
         - name: grafana-storage
-          mountPath: /var/lib/grafana
-        - name: grafana-dashboards-volume
-          mountPath: /var/lib/grafana/dashboards
+          mountPath: /var/lib/grafana/data
         ports:
         - containerPort: 3000
           name: http-grafana
@@ -44,42 +55,22 @@ spec:
         image: {{ .Values.nginx.image.repository }}:{{ default .Chart.AppVersion .Values.nginx.image.tag }}
         imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
         volumeMounts:
-        - name: nginx-config-volume
+        - name: nginx-config
           mountPath: /etc/nginx/
         ports:
         - containerPort: 80
           name: nginx-grafana
           protocol: TCP
       {{- end }}
-      initContainers:
-      - name: grafana-data-permission-fix
-        image: alpine:3
-        command:
-        - chown
-        - -R
-        - 472:472
-        - /var/lib/grafana
-        volumeMounts:
-        - name: grafana-storage
-          mountPath:  /var/lib/grafana
       volumes:
       {{- if .Values.grafana.auth.proxy }}
-      - name: nginx-config-volume
+      - name: nginx-config
         configMap:
           name: {{ include "brigade-prometheus.nginx.fullname" . }}
       {{- end }}
-      - name: grafana-config-volume
-        secret:
-          secretName: {{ include "brigade-prometheus.grafana.fullname" . }}-config
-      - name: grafana-datasources-volume
+      - name: grafana-datasources
         configMap:
           name: {{ include "brigade-prometheus.grafana.fullname" . }}-datasources
-      - name: grafana-dashboard-config-volume
-        configMap:
-          name: {{ include "brigade-prometheus.grafana.fullname" . }}-dashboard-config
-      - name: grafana-dashboards-volume
-        configMap:
-          name: {{ include "brigade-prometheus.grafana.fullname" . }}-dashboards
       - name: grafana-storage
         persistentVolumeClaim:
           claimName: pvc-{{ include "brigade-prometheus.grafana.fullname" . }}
