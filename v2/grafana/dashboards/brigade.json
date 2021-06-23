@@ -124,10 +124,69 @@
         "overrides": []
       },
       "gridPos": {
+        "h": 14,
+        "w": 18,
+        "x": 0,
+        "y": 13
+      },
+      "id": 16,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.0.2",
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "brigade_all_running_jobs_duration",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{exported_job}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Running Jobs Durations",
+      "type": "gauge"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
         "h": 9,
         "w": 6,
         "x": 0,
-        "y": 13
+        "y": 27
       },
       "id": 2,
       "options": {
@@ -212,7 +271,7 @@
         "h": 9,
         "w": 12,
         "x": 6,
-        "y": 13
+        "y": 27
       },
       "id": 4,
       "options": {
@@ -265,7 +324,7 @@
         "h": 9,
         "w": 6,
         "x": 0,
-        "y": 22
+        "y": 36
       },
       "id": 6,
       "options": {
@@ -349,7 +408,7 @@
         "h": 9,
         "w": 12,
         "x": 6,
-        "y": 22
+        "y": 36
       },
       "id": 8,
       "options": {
@@ -402,7 +461,7 @@
         "h": 9,
         "w": 6,
         "x": 0,
-        "y": 31
+        "y": 45
       },
       "id": 10,
       "options": {
@@ -486,7 +545,7 @@
         "h": 9,
         "w": 12,
         "x": 6,
-        "y": 31
+        "y": 45
       },
       "id": 12,
       "options": {
@@ -510,89 +569,6 @@
       ],
       "title": "Total Failed Workers",
       "type": "timeseries"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 18,
-        "x": 0,
-        "y": 40
-      },
-      "id": 16,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "brigade_all_running_jobs_duration",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Running Jobs Durations",
-      "type": "timeseries"
     }
   ],
   "schemaVersion": 30,
@@ -602,7 +578,7 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
