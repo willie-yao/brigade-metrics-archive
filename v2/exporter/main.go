@@ -71,6 +71,11 @@ var (
 		Name: "brigade_unknown_workers_total",
 		Help: "The total number of unknown workers",
 	})
+
+	runningWorkersByProject = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "brigade_running_workers_by_project",
+		Help: "The number of running workers by project",
+	}, []string{"projectID"})
 )
 
 func recordMetrics(client sdk.APIClient) {
@@ -93,6 +98,30 @@ func recordMetrics(client sdk.APIClient) {
 			recordWorkerGaugeMetric(client, totalTimedOutWorkers, core.WorkerPhaseTimedOut)
 			recordWorkerGaugeMetric(client, totalSchedulingFailedWorkers, core.WorkerPhaseSchedulingFailed)
 			recordWorkerGaugeMetric(client, totalUnknownWorkers, core.WorkerPhaseUnknown)
+
+			runningList, err := client.Core().Events().List(
+				context.Background(),
+				&core.EventsSelector{
+					WorkerPhases: []core.WorkerPhase{core.WorkerPhaseRunning},
+				},
+				&meta.ListOptions{},
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			eventMapByProjectID := make(map[string][]core.Event)
+
+			for _, event := range runningList.Items {
+				eventMapByProjectID[event.ProjectID] =
+					append(eventMapByProjectID[event.ProjectID], event)
+			}
+
+			for projectID, workerList := range eventMapByProjectID {
+				runningWorkersByProject.With(
+					prometheus.Labels{"projectID": projectID},
+				).Set(float64(len(workerList)))
+			}
 
 			time.Sleep(2 * time.Second)
 		}
@@ -131,7 +160,8 @@ func main() {
 	}
 
 	// Boolean indicating whether or not to ignore SSL errors
-	apiIgnoreCertWarnings, err := os.GetBoolFromEnvVar("API_IGNORE_CERT_WARNINGS", true)
+	apiIgnoreCertWarnings, err :=
+		os.GetBoolFromEnvVar("API_IGNORE_CERT_WARNINGS", true)
 	if err != nil {
 		log.Println(err)
 	}
