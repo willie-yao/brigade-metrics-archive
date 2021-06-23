@@ -76,6 +76,11 @@ var (
 		Name: "brigade_all_workers_by_phase",
 		Help: "All workers separated by phase",
 	}, []string{"workerPhase"})
+
+	allRunningJobsDuration = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "brigade_all_running_jobs_duration",
+		Help: "The duration of all running jobs",
+	}, []string{"job"})
 )
 
 func recordMetrics(client sdk.APIClient) {
@@ -121,7 +126,22 @@ func recordMetrics(client sdk.APIClient) {
 				).Set(float64(len(workerList)))
 			}
 
-			time.Sleep(2 * time.Second)
+			// Create list of all jobs
+			var jobsList []core.Job
+
+			for _, event := range eventsList.Items {
+				if event.Worker.Status.Phase == core.WorkerPhaseRunning {
+					jobsList = append(jobsList, event.Worker.Jobs...)
+				}
+			}
+
+			for _, job := range jobsList {
+				allRunningJobsDuration.With(
+					prometheus.Labels{"job": job.Name},
+				).Set(time.Since(*job.Status.Started).Seconds())
+			}
+
+			time.Sleep(5 * time.Second)
 		}
 	}()
 }
