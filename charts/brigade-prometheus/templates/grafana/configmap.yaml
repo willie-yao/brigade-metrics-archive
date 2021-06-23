@@ -14,15 +14,25 @@ data:
 
     http {
         server {
+            {{- if .Values.grafana.tls.enabled }}
+            listen 443 ssl;
+            server_name         www.example.com;
+            ssl_certificate     /var/lib/nginx/certs/tls.crt;
+            ssl_certificate_key /var/lib/nginx/certs/tls.key;
+            {{- else }}
             listen 80;
+            {{- end }}
+        
             root /usr/share/nginx/html;
             index index.html index.htm;
 
             location / {
               proxy_pass            http://localhost:3000/;
               proxy_set_header      Authorization "";
+              {{- if .Values.grafana.auth.proxy }}
               auth_basic            "Administrator’s Area";
               auth_basic_user_file  /etc/nginx/.htpasswd; 
+              {{- end }}
             }
         }
     }
