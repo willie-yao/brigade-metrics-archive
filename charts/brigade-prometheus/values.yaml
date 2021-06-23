@@ -50,8 +50,6 @@ prometheus:
 
   image:
     repository: prom/prometheus
-    ## tag should only be specified if you want to override Chart.appVersion
-    ## The default tag is the value of .Chart.AppVersion
     tag: v2.28.0
     pullPolicy: IfNotPresent
 
@@ -85,14 +83,14 @@ prometheus:
 grafana:
 
   image:
-    repository: grafana/grafana
+    repository: quillie/brigade-prometheus-grafana
     ## tag should only be specified if you want to override Chart.appVersion
     ## The default tag is the value of .Chart.AppVersion
-    tag: 8.0.3
+    # tag:
     pullPolicy: IfNotPresent
 
   auth:
-    ## Specify whether or not to use a reverse proxy + shared admin account
+    ## Specify whether or not to use a reverse proxy + shared account
     proxy: true
     username: willie
     password: test
@@ -169,8 +167,6 @@ nginx:
 
   image:
     repository: nginx
-    ## tag should only be specified if you want to override Chart.appVersion
-    ## The default tag is the value of .Chart.AppVersion
     tag: 1.20.1-alpine
     pullPolicy: IfNotPresent
 
