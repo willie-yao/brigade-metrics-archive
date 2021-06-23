@@ -19,6 +19,9 @@ spec:
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/grafana/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/grafana/secret.yaml") . | sha256sum }}
+        {{- if .Values.grafana.tls.enabled }}
+        checksum/cert-secret: {{ include (print $.Template.BasePath "/grafana/cert-secret.yaml") . | sha256sum }}
+        {{- end }}
     spec:
       containers:
       - name: grafana
@@ -46,27 +49,35 @@ spec:
           mountPath: /etc/grafana/provisioning/datasources
         - name: grafana-storage
           mountPath: /var/lib/grafana/data
-        ports:
-        - containerPort: 3000
-          name: http-grafana
-          protocol: TCP
-      {{- if .Values.grafana.auth.proxy }}
       - name: nginx
         image: {{ .Values.nginx.image.repository }}:{{ default .Chart.AppVersion .Values.nginx.image.tag }}
         imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
         volumeMounts:
         - name: nginx-config
           mountPath: /etc/nginx/
+        {{- if .Values.grafana.tls.enabled }}
+        - name: cert
+          mountPath: /var/lib/nginx/certs
+          readOnly: true
+        {{- end }}
         ports:
-        - containerPort: 80
-          name: nginx-grafana
+        {{- if .Values.grafana.tls.enabled }}
+        - containerPort: 443
+          name: https
           protocol: TCP
-      {{- end }}
+        {{- else }}
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        {{- end }}
       volumes:
-      {{- if .Values.grafana.auth.proxy }}
       - name: nginx-config
         configMap:
           name: {{ include "brigade-prometheus.nginx.fullname" . }}
+      {{- if .Values.grafana.tls.enabled }}
+      - name: cert
+        secret:
+          secretName: {{ include "brigade-prometheus.grafana.fullname" . }}-cert
       {{- end }}
       - name: grafana-datasources
         configMap:
