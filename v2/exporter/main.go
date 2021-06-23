@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/brigadecore/brigade/sdk/v2"
+	"github.com/brigadecore/brigade/sdk/v2/authn"
 	"github.com/brigadecore/brigade/sdk/v2/core"
 	"github.com/brigadecore/brigade/sdk/v2/meta"
 	"github.com/brigadecore/brigade/sdk/v2/restmachinery"
@@ -77,10 +78,25 @@ var (
 		Help: "All workers separated by phase",
 	}, []string{"workerPhase"})
 
+	allJobsByPhase = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "brigade_all_jobs_by_phase",
+		Help: "All jobs separated by phase",
+	}, []string{"jobPhase"})
+
 	allRunningJobsDuration = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "brigade_all_running_jobs_duration",
 		Help: "The duration of all running jobs",
 	}, []string{"job"})
+
+	allRunningWorkersDuration = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "brigade_all_running_workers_duration",
+		Help: "The duration of all running workers",
+	}, []string{"worker"})
+
+	totalUsers = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_users_total",
+		Help: "The total number of users",
+	})
 )
 
 func recordMetrics(client sdk.APIClient) {
@@ -104,6 +120,7 @@ func recordMetrics(client sdk.APIClient) {
 			recordWorkerGaugeMetric(client, totalSchedulingFailedWorkers, core.WorkerPhaseSchedulingFailed)
 			recordWorkerGaugeMetric(client, totalUnknownWorkers, core.WorkerPhaseUnknown)
 
+			// brigade_all_workers_by_phase
 			eventsList, err := client.Core().Events().List(
 				context.Background(),
 				&core.EventsSelector{},
@@ -126,20 +143,52 @@ func recordMetrics(client sdk.APIClient) {
 				).Set(float64(len(workerList)))
 			}
 
-			// Create list of all jobs
-			var jobsList []core.Job
+			// brigade_all_running_workers_duration
+			for _, worker := range eventMapByStatus[core.WorkerPhaseRunning] {
+				allRunningWorkersDuration.With(
+					prometheus.Labels{"worker": worker.ID},
+				).Set(time.Since(*worker.Worker.Status.Started).Seconds())
+			}
+
+			// brigade_all_running_jobs_duration
+			var jobsMapByStatus = make(map[core.JobPhase][]core.Job)
+			var runningJobsList []core.Job
 
 			for _, event := range eventsList.Items {
 				if event.Worker.Status.Phase == core.WorkerPhaseRunning {
-					jobsList = append(jobsList, event.Worker.Jobs...)
+					runningJobsList = append(runningJobsList, event.Worker.Jobs...)
+				}
+				for _, job := range event.Worker.Jobs {
+					jobsMapByStatus[job.Status.Phase] =
+						append(jobsMapByStatus[job.Status.Phase], job)
 				}
 			}
 
-			for _, job := range jobsList {
+			for _, job := range runningJobsList {
 				allRunningJobsDuration.With(
 					prometheus.Labels{"job": job.Name},
 				).Set(time.Since(*job.Status.Started).Seconds())
 			}
+
+			// brigade_all_running_jobs_duration
+			for jobPhase, jobList := range jobsMapByStatus {
+				allJobsByPhase.With(
+					prometheus.Labels{"jobPhase": string(jobPhase)},
+				).Set(float64(len(jobList)))
+			}
+
+			// brigade_users_total
+			userList, err := client.Authn().Users().List(
+				context.Background(),
+				&authn.UsersSelector{},
+				&meta.ListOptions{},
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			totalUsers.Set(float64(len(userList.Items) +
+				int(userList.RemainingItemCount)))
 
 			time.Sleep(5 * time.Second)
 		}
