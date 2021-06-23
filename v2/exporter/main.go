@@ -72,10 +72,10 @@ var (
 		Help: "The total number of unknown workers",
 	})
 
-	runningWorkersByProject = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "brigade_running_workers_by_project",
-		Help: "The number of running workers by project",
-	}, []string{"projectID"})
+	allWorkersByPhase = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "brigade_all_workers_by_phase",
+		Help: "All workers separated by phase",
+	}, []string{"workerPhase"})
 )
 
 func recordMetrics(client sdk.APIClient) {
@@ -99,27 +99,25 @@ func recordMetrics(client sdk.APIClient) {
 			recordWorkerGaugeMetric(client, totalSchedulingFailedWorkers, core.WorkerPhaseSchedulingFailed)
 			recordWorkerGaugeMetric(client, totalUnknownWorkers, core.WorkerPhaseUnknown)
 
-			runningList, err := client.Core().Events().List(
+			eventsList, err := client.Core().Events().List(
 				context.Background(),
-				&core.EventsSelector{
-					WorkerPhases: []core.WorkerPhase{core.WorkerPhaseRunning},
-				},
+				&core.EventsSelector{},
 				&meta.ListOptions{},
 			)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			eventMapByProjectID := make(map[string][]core.Event)
+			eventMapByStatus := make(map[core.WorkerPhase][]core.Event)
 
-			for _, event := range runningList.Items {
-				eventMapByProjectID[event.ProjectID] =
-					append(eventMapByProjectID[event.ProjectID], event)
+			for _, event := range eventsList.Items {
+				eventMapByStatus[event.Worker.Status.Phase] =
+					append(eventMapByStatus[event.Worker.Status.Phase], event)
 			}
 
-			for projectID, workerList := range eventMapByProjectID {
-				runningWorkersByProject.With(
-					prometheus.Labels{"projectID": projectID},
+			for workerPhase, workerList := range eventMapByStatus {
+				allWorkersByPhase.With(
+					prometheus.Labels{"workerPhase": string(workerPhase)},
 				).Set(float64(len(workerList)))
 			}
 
