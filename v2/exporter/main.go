@@ -57,6 +57,7 @@ var (
 func recordMetrics(client sdk.APIClient) {
 	go func() {
 		for {
+			// brigade_running_jobs_total
 			tempRunningJobs, err :=
 				client.Core().Substrate().CountRunningJobs(context.Background())
 			if err != nil {
@@ -65,6 +66,7 @@ func recordMetrics(client sdk.APIClient) {
 			totalRunningJobs.Set(float64(tempRunningJobs.Count))
 
 			for _, phase := range core.WorkerPhasesAll() {
+				// brigade_all_workers_by_phase
 				eventsList, err := client.Core().Events().List(
 					context.Background(),
 					&core.EventsSelector{
@@ -142,7 +144,7 @@ func recordMetrics(client sdk.APIClient) {
 			totalProjects.Set(float64(len(projectList.Items) +
 				int(projectList.RemainingItemCount)))
 
-			time.Sleep(5 * time.Second)
+			time.Sleep(3 * time.Second)
 		}
 	}()
 }
