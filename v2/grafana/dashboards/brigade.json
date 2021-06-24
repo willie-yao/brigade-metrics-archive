@@ -438,7 +438,7 @@
           "refId": "A"
         }
       ],
-      "title": "Total Running Jobs",
+      "title": "Running Job History",
       "type": "timeseries"
     },
     {
@@ -471,7 +471,7 @@
         "x": 0,
         "y": 31
       },
-      "id": 6,
+      "id": 24,
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -488,7 +488,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "brigade_pending_workers_total",
+          "expr": "brigade_all_workers_by_phase{workerPhase=\"PENDING\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -569,150 +569,13 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "brigade_pending_workers_total",
+          "expr": "brigade_all_workers_by_phase{workerPhase=\"PENDING\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "Total Pending Workers",
-      "type": "timeseries"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 6,
-        "x": 0,
-        "y": 40
-      },
-      "id": 10,
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "8.0.2",
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "brigade_failed_workers_total",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Current Failed Workers",
-      "type": "gauge"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 6,
-        "y": 40
-      },
-      "id": 12,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "single"
-        }
-      },
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "brigade_failed_workers_total",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Total Failed Workers",
+      "title": "Pending Workers History",
       "type": "timeseries"
     }
   ],
