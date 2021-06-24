@@ -109,18 +109,33 @@ func recordMetrics(client sdk.APIClient) {
 			}
 			totalRunningJobs.Set(float64(tempRunningJobs.Count))
 
-			recordWorkerGaugeMetric(client, totalStartingWorkers, core.WorkerPhaseStarting)
-			recordWorkerGaugeMetric(client, totalRunningWorkers, core.WorkerPhaseRunning)
-			recordWorkerGaugeMetric(client, totalPendingWorkers, core.WorkerPhasePending)
-			recordWorkerGaugeMetric(client, totalFailedWorkers, core.WorkerPhaseFailed)
-			recordWorkerGaugeMetric(client, totalAbortedWorkers, core.WorkerPhaseAborted)
-			recordWorkerGaugeMetric(client, totalCanceledWorkers, core.WorkerPhaseCanceled)
-			recordWorkerGaugeMetric(client, totalSucceededWorkers, core.WorkerPhaseSucceeded)
-			recordWorkerGaugeMetric(client, totalTimedOutWorkers, core.WorkerPhaseTimedOut)
-			recordWorkerGaugeMetric(client, totalSchedulingFailedWorkers, core.WorkerPhaseSchedulingFailed)
-			recordWorkerGaugeMetric(client, totalUnknownWorkers, core.WorkerPhaseUnknown)
+			for _, phase := range core.WorkerPhasesAll() {
+				eventsList, err := client.Core().Events().List(
+					context.Background(),
+					&core.EventsSelector{
+						WorkerPhases: []core.WorkerPhase{phase},
+					},
+					&meta.ListOptions{},
+				)
+				if err != nil {
+					log.Fatal(err)
+				}
 
-			// brigade_all_workers_by_phase
+				allWorkersByPhase.With(
+					prometheus.Labels{"workerPhase": string(phase)},
+				).Set(float64(len(eventsList.Items) +
+					int(eventsList.RemainingItemCount)))
+
+				// brigade_all_running_workers_duration
+				if phase == core.WorkerPhaseRunning {
+					for _, worker := range eventsList.Items {
+						allRunningWorkersDuration.With(
+							prometheus.Labels{"worker": worker.ID},
+						).Set(time.Since(*worker.Worker.Status.Started).Seconds())
+					}
+				}
+			}
+
 			eventsList, err := client.Core().Events().List(
 				context.Background(),
 				&core.EventsSelector{},
@@ -128,26 +143,6 @@ func recordMetrics(client sdk.APIClient) {
 			)
 			if err != nil {
 				log.Fatal(err)
-			}
-
-			eventMapByStatus := make(map[core.WorkerPhase][]core.Event)
-
-			for _, event := range eventsList.Items {
-				eventMapByStatus[event.Worker.Status.Phase] =
-					append(eventMapByStatus[event.Worker.Status.Phase], event)
-			}
-
-			for workerPhase, workerList := range eventMapByStatus {
-				allWorkersByPhase.With(
-					prometheus.Labels{"workerPhase": string(workerPhase)},
-				).Set(float64(len(workerList)))
-			}
-
-			// brigade_all_running_workers_duration
-			for _, worker := range eventMapByStatus[core.WorkerPhaseRunning] {
-				allRunningWorkersDuration.With(
-					prometheus.Labels{"worker": worker.ID},
-				).Set(time.Since(*worker.Worker.Status.Started).Seconds())
 			}
 
 			// brigade_all_running_jobs_duration
@@ -170,7 +165,7 @@ func recordMetrics(client sdk.APIClient) {
 				).Set(time.Since(*job.Status.Started).Seconds())
 			}
 
-			// brigade_all_running_jobs_duration
+			// brigade_all_jobs_by_phase
 			for jobPhase, jobList := range jobsMapByStatus {
 				allJobsByPhase.With(
 					prometheus.Labels{"jobPhase": string(jobPhase)},
@@ -195,21 +190,21 @@ func recordMetrics(client sdk.APIClient) {
 	}()
 }
 
-func recordWorkerGaugeMetric(client sdk.APIClient, gauge prometheus.Gauge, phase core.WorkerPhase) {
-	eventList, err := client.Core().Events().List(
-		context.Background(),
-		&core.EventsSelector{
-			WorkerPhases: []core.WorkerPhase{phase},
-		},
-		&meta.ListOptions{},
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
+// func recordWorkerGaugeMetric(client sdk.APIClient, gauge prometheus.Gauge, phase core.WorkerPhase) {
+// 	eventList, err := client.Core().Events().List(
+// 		context.Background(),
+// 		&core.EventsSelector{
+// 			WorkerPhases: []core.WorkerPhase{phase},
+// 		},
+// 		&meta.ListOptions{},
+// 	)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	gauge.Set(float64(len(eventList.Items) +
-		int(eventList.RemainingItemCount)))
-}
+// 	gauge.Set(float64(len(eventList.Items) +
+// 		int(eventList.RemainingItemCount)))
+// }
 
 func main() {
 
