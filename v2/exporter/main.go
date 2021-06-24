@@ -47,6 +47,11 @@ var (
 		Name: "brigade_service_accounts_total",
 		Help: "The total number of service accounts",
 	})
+
+	totalProjects = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_projects_total",
+		Help: "The total number of brigade projects",
+	})
 )
 
 func recordMetrics(client sdk.APIClient) {
@@ -124,31 +129,43 @@ func recordMetrics(client sdk.APIClient) {
 			totalServiceAccounts.Set(float64(len(saList.Items) +
 				int(saList.RemainingItemCount)))
 
+			// brigade_projects_total
+			projectList, err := client.Core().Projects().List(
+				context.Background(),
+				&core.ProjectsSelector{},
+				&meta.ListOptions{},
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			totalProjects.Set(float64(len(projectList.Items) +
+				int(projectList.RemainingItemCount)))
+
 			time.Sleep(5 * time.Second)
 		}
 	}()
 }
 
-func main() {
-
+func initializeClient() (sdk.APIClient, error) {
 	// The address of the Brigade 2 API server
 	// beginning with http:// or https//
 	apiAddress, err := os.GetRequiredEnvVar("API_ADDRESS")
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	// An API token obtained using the Brigade 2 CLI
 	apiToken, err := os.GetRequiredEnvVar("API_TOKEN")
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	// Boolean indicating whether or not to ignore SSL errors
 	apiIgnoreCertWarnings, err :=
 		os.GetBoolFromEnvVar("API_IGNORE_CERT_WARNINGS", true)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 
 	// Instantiate the API Client
@@ -159,6 +176,16 @@ func main() {
 			AllowInsecureConnections: apiIgnoreCertWarnings,
 		},
 	)
+
+	return client, nil
+}
+
+func main() {
+
+	client, err := initializeClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	recordMetrics(client)
 

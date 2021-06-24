@@ -58,12 +58,14 @@ There are two methods of authentication you can choose from for logging into Gra
 
 For option 1, set `grafana.auth.proxy` to false in `values.yaml`, and true for option 2.
 
+In addition, you have the option to enable tls or ingress for grafana, and both options can be configured in `values.yaml`.
+
 Save the file, and run `make hack` from the project's root directory.
 
 Once all three pods of the project are up and running, run the following command to expose the Grafana frontend:
 
 ```console
-$ kubectl port-forward service/brigade-prometheus-grafana 3000:80 -n brigade-prometheus
+$ kubectl port-forward service/brigade-prometheus-grafana 3000:<80 (tls disabled), 443 (tls enabled)> -n brigade-prometheus
 ```
 
 Enter your supplied credentials. You can now access the Grafana dashboard!

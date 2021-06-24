@@ -133,6 +133,7 @@
     },
     {
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -161,7 +162,7 @@
         "x": 21,
         "y": 0
       },
-      "id": 22,
+      "id": 32,
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -178,13 +179,13 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "brigade_users_total",
+          "expr": "brigade_projects_total",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "Total Users",
+      "title": "Total Brigade Projects",
       "type": "gauge"
     },
     {
@@ -217,7 +218,7 @@
         "x": 21,
         "y": 7
       },
-      "id": 30,
+      "id": 22,
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -234,13 +235,13 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "brigade_service_accounts_total",
+          "expr": "brigade_users_total",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "Total Service Accounts",
+      "title": "Total Users",
       "type": "gauge"
     },
     {
@@ -380,6 +381,62 @@
       ],
       "title": "Running Job History",
       "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 3,
+        "x": 21,
+        "y": 14
+      },
+      "id": 30,
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.0.2",
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "brigade_service_accounts_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Service Accounts",
+      "type": "gauge"
     },
     {
       "datasource": null,
@@ -664,7 +721,7 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
