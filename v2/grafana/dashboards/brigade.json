@@ -48,9 +48,8 @@
         "x": 0,
         "y": 0
       },
-      "id": 16,
+      "id": 20,
       "options": {
-        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -66,15 +65,13 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "brigade_all_running_jobs_duration",
-          "format": "time_series",
+          "expr": "brigade_all_running_workers_duration",
           "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{exported_job}}",
+          "legendFormat": "{{ worker }}",
           "refId": "A"
         }
       ],
-      "title": "Running Jobs Durations",
+      "title": "All Running Workers Duration",
       "type": "gauge"
     },
     {
@@ -107,7 +104,8 @@
         "x": 9,
         "y": 0
       },
-      "id": 20,
+      "id": 14,
+      "interval": "5s",
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -124,13 +122,13 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "brigade_all_running_workers_duration",
+          "expr": "brigade_all_workers_by_phase",
           "interval": "",
-          "legendFormat": "{{ worker }}",
+          "legendFormat": "{{ workerPhase }}",
           "refId": "A"
         }
       ],
-      "title": "All Running Workers Duration",
+      "title": "All Workers By Phase",
       "type": "gauge"
     },
     {
@@ -214,13 +212,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 11,
-        "w": 9,
-        "x": 0,
-        "y": 11
+        "h": 7,
+        "w": 3,
+        "x": 21,
+        "y": 7
       },
-      "id": 18,
-      "interval": "5s",
+      "id": 30,
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -237,70 +234,13 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "brigade_all_jobs_by_phase",
+          "expr": "brigade_service_accounts_total",
           "interval": "",
-          "legendFormat": "{{ jobPhase }}",
+          "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "All Jobs by Phase",
-      "type": "gauge"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 9,
-        "x": 9,
-        "y": 11
-      },
-      "id": 14,
-      "interval": "5s",
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "8.0.2",
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "brigade_all_workers_by_phase",
-          "interval": "",
-          "legendFormat": "{{ workerPhase }}",
-          "refId": "A"
-        }
-      ],
-      "title": "All Workers By Phase",
+      "title": "Total Service Accounts",
       "type": "gauge"
     },
     {
@@ -331,7 +271,7 @@
         "h": 9,
         "w": 6,
         "x": 0,
-        "y": 22
+        "y": 11
       },
       "id": 2,
       "options": {
@@ -416,7 +356,7 @@
         "h": 9,
         "w": 12,
         "x": 6,
-        "y": 22
+        "y": 11
       },
       "id": 4,
       "options": {
@@ -469,7 +409,144 @@
         "h": 9,
         "w": 6,
         "x": 0,
-        "y": 31
+        "y": 20
+      },
+      "id": 26,
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.0.2",
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "brigade_pending_jobs_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Current Pending Jobs",
+      "type": "gauge"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 6,
+        "y": 20
+      },
+      "id": 28,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "brigade_pending_jobs_total",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Pending Job History",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 0,
+        "y": 29
       },
       "id": 24,
       "options": {
@@ -553,7 +630,7 @@
         "h": 9,
         "w": 12,
         "x": 6,
-        "y": 31
+        "y": 29
       },
       "id": 8,
       "options": {

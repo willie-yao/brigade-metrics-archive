@@ -20,23 +20,18 @@ import (
 var (
 	totalRunningJobs = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "brigade_running_jobs_total",
-		Help: "The total number of processed events",
+		Help: "The total number of running jobs",
+	})
+
+	totalPendingJobs = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_pending_jobs_total",
+		Help: "The total number of pending jobs",
 	})
 
 	allWorkersByPhase = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "brigade_all_workers_by_phase",
 		Help: "All workers separated by phase",
 	}, []string{"workerPhase"})
-
-	allJobsByPhase = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "brigade_all_jobs_by_phase",
-		Help: "All jobs separated by phase",
-	}, []string{"jobPhase"})
-
-	allRunningJobsDuration = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "brigade_all_running_jobs_duration",
-		Help: "The duration of all running jobs",
-	}, []string{"job"})
 
 	allRunningWorkersDuration = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "brigade_all_running_workers_duration",
@@ -46,6 +41,11 @@ var (
 	totalUsers = promauto.NewGauge(prometheus.GaugeOpts{
 		Name: "brigade_users_total",
 		Help: "The total number of users",
+	})
+
+	totalServiceAccounts = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "brigade_service_accounts_total",
+		Help: "The total number of service accounts",
 	})
 )
 
@@ -78,48 +78,24 @@ func recordMetrics(client sdk.APIClient) {
 
 				// brigade_all_running_workers_duration
 				if phase == core.WorkerPhaseRunning {
+					var jobsList []core.Job
 					for _, worker := range eventsList.Items {
 						allRunningWorkersDuration.With(
 							prometheus.Labels{"worker": worker.ID},
 						).Set(time.Since(*worker.Worker.Status.Started).Seconds())
+
+						// brigade_pending_jobs_total
+						for _, job := range worker.Worker.Jobs {
+							if job.Status.Phase == core.JobPhasePending {
+								jobsList = append(jobsList, job)
+							}
+						}
 					}
+
+					// brigade_pending_jobs_total
+					totalPendingJobs.Set(float64(len(jobsList)))
+
 				}
-			}
-
-			eventsList, err := client.Core().Events().List(
-				context.Background(),
-				&core.EventsSelector{},
-				&meta.ListOptions{},
-			)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			// brigade_all_running_jobs_duration
-			var jobsMapByStatus = make(map[core.JobPhase][]core.Job)
-			var runningJobsList []core.Job
-
-			for _, event := range eventsList.Items {
-				if event.Worker.Status.Phase == core.WorkerPhaseRunning {
-					runningJobsList = append(runningJobsList, event.Worker.Jobs...)
-				}
-				for _, job := range event.Worker.Jobs {
-					jobsMapByStatus[job.Status.Phase] =
-						append(jobsMapByStatus[job.Status.Phase], job)
-				}
-			}
-
-			for _, job := range runningJobsList {
-				allRunningJobsDuration.With(
-					prometheus.Labels{"job": job.Name},
-				).Set(time.Since(*job.Status.Started).Seconds())
-			}
-
-			// brigade_all_jobs_by_phase
-			for jobPhase, jobList := range jobsMapByStatus {
-				allJobsByPhase.With(
-					prometheus.Labels{"jobPhase": string(jobPhase)},
-				).Set(float64(len(jobList)))
 			}
 
 			// brigade_users_total
@@ -134,6 +110,19 @@ func recordMetrics(client sdk.APIClient) {
 
 			totalUsers.Set(float64(len(userList.Items) +
 				int(userList.RemainingItemCount)))
+
+			// brigade_service_accounts_total
+			saList, err := client.Authn().ServiceAccounts().List(
+				context.Background(),
+				&authn.ServiceAccountsSelector{},
+				&meta.ListOptions{},
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			totalServiceAccounts.Set(float64(len(saList.Items) +
+				int(saList.RemainingItemCount)))
 
 			time.Sleep(5 * time.Second)
 		}
