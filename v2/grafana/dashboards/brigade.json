@@ -49,6 +49,8 @@
         "y": 0
       },
       "id": 20,
+      "interval": "5s",
+      "maxDataPoints": null,
       "options": {
         "reduceOptions": {
           "calcs": [
@@ -71,6 +73,7 @@
           "refId": "A"
         }
       ],
+      "timeFrom": "5s",
       "title": "All Running Workers Duration",
       "type": "gauge"
     },
@@ -128,6 +131,7 @@
           "refId": "A"
         }
       ],
+      "timeFrom": null,
       "title": "All Workers By Phase",
       "type": "gauge"
     },

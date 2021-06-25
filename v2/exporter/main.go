@@ -84,25 +84,28 @@ func recordMetrics(client sdk.APIClient) {
 					int(eventsList.RemainingItemCount)))
 
 				// brigade_all_running_workers_duration
-				if phase == core.WorkerPhaseRunning {
-					var jobsList []core.Job
-					for _, worker := range eventsList.Items {
+
+				var jobsList []core.Job
+				for _, worker := range eventsList.Items {
+					if phase == core.WorkerPhaseRunning {
 						allRunningWorkersDuration.With(
 							prometheus.Labels{"worker": worker.ID},
 						).Set(time.Since(*worker.Worker.Status.Started).Seconds())
-
 						// brigade_pending_jobs_total
 						for _, job := range worker.Worker.Jobs {
 							if job.Status.Phase == core.JobPhasePending {
 								jobsList = append(jobsList, job)
 							}
 						}
+					} else {
+						allRunningWorkersDuration.Delete(
+							prometheus.Labels{"worker": worker.ID},
+						)
 					}
-
-					// brigade_pending_jobs_total
-					totalPendingJobs.Set(float64(len(jobsList)))
-
 				}
+
+				// brigade_pending_jobs_total
+				totalPendingJobs.Set(float64(len(jobsList)))
 			}
 
 			// brigade_users_total
