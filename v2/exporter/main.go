@@ -54,7 +54,7 @@ var (
 	})
 )
 
-func recordMetrics(client sdk.APIClient) {
+func recordMetrics(client sdk.APIClient, scrapeInterval int) {
 	go func() {
 		for {
 			// brigade_running_jobs_total
@@ -147,7 +147,7 @@ func recordMetrics(client sdk.APIClient) {
 			totalProjects.Set(float64(len(projectList.Items) +
 				int(projectList.RemainingItemCount)))
 
-			time.Sleep(3 * time.Second)
+			time.Sleep(time.Duration(scrapeInterval) * time.Second)
 		}
 	}()
 }
@@ -186,13 +186,17 @@ func initializeClient() (sdk.APIClient, error) {
 }
 
 func main() {
+	scrapeInterval, err := os.GetIntFromEnvVar("PROM_SCRAPE_INTERVAL", 5)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	client, err := initializeClient()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	recordMetrics(client)
+	recordMetrics(client, scrapeInterval)
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(":8080", nil)
