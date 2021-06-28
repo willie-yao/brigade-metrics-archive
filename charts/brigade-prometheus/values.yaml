@@ -16,7 +16,7 @@ exporter:
   brigade:
     ## Address of your Brigade 2 API server, including leading protocol
     ## (http:// or https://)
-    apiAddress: https://brigade2-apiserver.brigade2.svc.cluster.local
+    apiAddress: https://brigade-apiserver.brigade.svc.cluster.local
     ## API token belonging to a Brigade 2 service account
     apiToken: <placeholder>
     ## Whether to ignore cert warning from the API server
@@ -52,6 +52,8 @@ prometheus:
     repository: prom/prometheus
     tag: v2.28.0
     pullPolicy: IfNotPresent
+
+  scrapeInterval: 3
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as
@@ -96,7 +98,7 @@ grafana:
   ## TODO: Clean up and document these options
   auth:
     ## Specify whether or not to use a reverse proxy + shared account
-    proxy: true
+    proxy: false
     username: willie
     password: test
   
