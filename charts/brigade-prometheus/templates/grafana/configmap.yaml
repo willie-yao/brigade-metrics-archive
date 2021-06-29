@@ -60,3 +60,27 @@ data:
       access: proxy
       isDefault: true
       url: http://{{ include "brigade-prometheus.prometheus.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "brigade-prometheus.grafana.fullname" . }}-dashboard-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "brigade-prometheus.labels" . | nindent 4 }}
+    {{- include "brigade-prometheus.grafana.labels" . | nindent 4 }}
+data:
+  dashboards.yaml: |-
+    apiVersion: 1
+    providers:
+      - name: 'Brigade'
+        type: file
+        disableDeletion: true
+        updateIntervalSeconds: 2
+        allowUiUpdates: false
+        options:
+          path: /var/lib/grafana/dashboards
+          foldersFromFilesStructure: false

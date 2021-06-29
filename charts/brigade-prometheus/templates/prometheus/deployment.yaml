@@ -33,6 +33,27 @@ spec:
           mountPath: /etc/prometheus/
         - name: prometheus-storage-volume
           mountPath: /prometheus/
+      - name: node-exporter
+        image: prom/node-exporter
+        ports:
+          - containerPort: 9100
+            protocol: TCP
+        resources:
+          limits:
+            cpu: 250m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+        volumeMounts:
+        - mountPath: /host/sys
+          mountPropagation: HostToContainer
+          name: sys
+          readOnly: true
+        - mountPath: /host/root
+          mountPropagation: HostToContainer
+          name: root
+          readOnly: true
       volumes:
       - name: prometheus-config-volume
         configMap:
@@ -40,6 +61,12 @@ spec:
       - name: prometheus-storage-volume
         persistentVolumeClaim:
           claimName: pvc-{{ include "brigade-prometheus.prometheus.fullname" . }}
+      - hostPath:
+          path: /sys
+        name: sys
+      - hostPath:
+          path: /
+        name: root
       {{- with .Values.prometheus.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

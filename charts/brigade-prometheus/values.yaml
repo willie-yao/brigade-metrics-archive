@@ -16,7 +16,7 @@ exporter:
   brigade:
     ## Address of your Brigade 2 API server, including leading protocol
     ## (http:// or https://)
-    apiAddress: https://brigade-apiserver.brigade.svc.cluster.local
+    apiAddress: https://brigade2-apiserver.brigade2.svc.cluster.local
     ## API token belonging to a Brigade 2 service account
     apiToken: <placeholder>
     ## Whether to ignore cert warning from the API server
@@ -40,7 +40,9 @@ exporter:
   tolerations: []
 
   service:
-    type: ClusterIP
+    type: NodePort
+    annotations:
+      prometheus.io/scrape: "true"
     ## Host port the service will be mapped to when service type is either
     ## NodePort or LoadBalancer. If not specified, Kubernetes chooses.
     # nodePort: 31700

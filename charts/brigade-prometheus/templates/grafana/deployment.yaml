@@ -82,6 +82,9 @@ spec:
       - name: grafana-datasources
         configMap:
           name: {{ include "brigade-prometheus.grafana.fullname" . }}-datasources
+      - name: grafana-dashboard-config-volume
+        configMap:
+          name: {{ include "brigade-prometheus.grafana.fullname" . }}-dashboard-config
       - name: grafana-storage
         persistentVolumeClaim:
           claimName: pvc-{{ include "brigade-prometheus.grafana.fullname" . }}

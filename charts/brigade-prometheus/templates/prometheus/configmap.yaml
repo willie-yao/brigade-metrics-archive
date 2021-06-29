@@ -14,7 +14,7 @@ data:
         monitor: 'codelab-monitor'
 
     scrape_configs:
-    - job_name: 'node-exporter'
+    - job_name: 'brigade-exporter'
 
       # Override the global default and scrape targets from this job every 5 seconds.
       scrape_interval: {{ .Values.prometheus.scrapeInterval }}s
@@ -26,6 +26,6 @@ data:
           group: 'exporter'
 
       - targets:
-        - brigade-apiserver.brigade.svc.cluster.local:443
+        - localhost:9100
         labels:
-          group: 'apiserver'
+          group: 'node-exporter'
