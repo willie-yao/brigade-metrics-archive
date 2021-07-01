@@ -72,9 +72,13 @@ prometheus:
 
   tolerations: []
 
-  volumes:
-    storageClass: standard
+  ## Persist data to a volume
+  persistence:
+    enabled: true
+    ## If undefined, the cluster's default storage class is used
+    # storageClass:
     accessMode: ReadWriteOnce
+    size: 8Gi
 
   service:
     type: ClusterIP
@@ -102,9 +106,13 @@ grafana:
     username: willie
     password: test
   
-  volumes:
-    storageClass: standard
+  ## Persist data to a volume
+  persistence:
+    enabled: true
+    ## If undefined, the cluster's default storage class is used
+    # storageClass:
     accessMode: ReadWriteOnce
+    size: 8Gi
 
   tls:
     ## Whether to enable TLS. If true then you MUST do ONE of three things to
