@@ -39,7 +39,12 @@ spec:
           name: {{ include "brigade-prometheus.prometheus.fullname" . }}
       - name: prometheus-storage-volume
         persistentVolumeClaim:
-          claimName: pvc-{{ include "brigade-prometheus.prometheus.fullname" . }}
+          claimName: {{ include "brigade-prometheus.prometheus.fullname" . }}
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
       {{- with .Values.prometheus.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
