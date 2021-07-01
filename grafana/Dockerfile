@@ -6,6 +6,6 @@ ENV GF_USERS_ALLOW_SIGN_UP=false
 
 
 # TODO: Not sure if the license permits this. Run this by CELA.
-COPY v2/grafana/images/ /usr/share/grafana/public/img/
+COPY grafana/images/ /usr/share/grafana/public/img/
 
-COPY v2/grafana/dashboards/ /var/lib/grafana/dashboards/
+COPY grafana/dashboards/ /var/lib/grafana/dashboards/

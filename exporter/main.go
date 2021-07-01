@@ -14,7 +14,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/willie-yao/brigade-prometheus/v2/exporter/internal/os"
+	"github.com/willie-yao/brigade-prometheus/exporter/internal/os"
 )
 
 var (
