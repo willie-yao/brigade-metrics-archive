@@ -7,6 +7,8 @@ metadata:
     {{- include "brigade-prometheus.grafana.labels" . | nindent 4 }}
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
@@ -51,7 +53,7 @@ spec:
         volumeMounts:
         - name: grafana-datasources
           mountPath: /etc/grafana/provisioning/datasources
-        - name: grafana-storage
+        - name: data
           mountPath: /var/lib/grafana/data
       - name: nginx
         image: {{ .Values.nginx.image.repository }}:{{ default .Chart.AppVersion .Values.nginx.image.tag }}
@@ -86,9 +88,13 @@ spec:
       - name: grafana-datasources
         configMap:
           name: {{ include "brigade-prometheus.grafana.fullname" . }}-datasources
-      - name: grafana-storage
+      - name: data
+        {{- if .Values.grafana.persistence.enabled }}
         persistentVolumeClaim:
           claimName: {{ include "brigade-prometheus.grafana.fullname" . }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
       securityContext:
         fsGroup: 472
       {{- with .Values.grafana.nodeSelector }}

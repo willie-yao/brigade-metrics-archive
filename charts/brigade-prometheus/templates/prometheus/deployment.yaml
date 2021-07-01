@@ -7,6 +7,8 @@ metadata:
     {{- include "brigade-prometheus.prometheus.labels" . | nindent 4 }}
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
@@ -31,15 +33,19 @@ spec:
         volumeMounts:
         - name: prometheus-config-volume
           mountPath: /etc/prometheus/
-        - name: prometheus-storage-volume
+        - name: data
           mountPath: /prometheus/
       volumes:
       - name: prometheus-config-volume
         configMap:
           name: {{ include "brigade-prometheus.prometheus.fullname" . }}
-      - name: prometheus-storage-volume
+      - name: data
+        {{- if .Values.prometheus.persistence.enabled }}
         persistentVolumeClaim:
           claimName: {{ include "brigade-prometheus.prometheus.fullname" . }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
       securityContext:
         fsGroup: 65534
         runAsGroup: 65534
