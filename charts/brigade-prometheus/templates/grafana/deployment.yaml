@@ -27,6 +27,10 @@ spec:
       - name: grafana
         image: {{ .Values.grafana.image.repository }}:{{ default .Chart.AppVersion .Values.grafana.image.tag }}
         imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
+        securityContext:
+          runAsGroup: 472
+          runAsNonRoot: true
+          runAsUser: 472
         env:
         {{- if .Values.grafana.auth.proxy }}
         - name: GF_AUTH_ANONYMOUS_ENABLED
@@ -84,7 +88,9 @@ spec:
           name: {{ include "brigade-prometheus.grafana.fullname" . }}-datasources
       - name: grafana-storage
         persistentVolumeClaim:
-          claimName: pvc-{{ include "brigade-prometheus.grafana.fullname" . }}
+          claimName: {{ include "brigade-prometheus.grafana.fullname" . }}
+      securityContext:
+        fsGroup: 472
       {{- with .Values.grafana.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
