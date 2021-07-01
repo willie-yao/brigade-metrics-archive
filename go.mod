@@ -1,4 +1,4 @@
-module github.com/willie-yao/brigade-prometheus/v2
+module github.com/willie-yao/brigade-prometheus
 
 go 1.16
 

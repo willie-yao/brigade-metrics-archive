@@ -91,14 +91,14 @@ IMMUTABLE_DOCKER_TAG := $(VERSION)
 .PHONY: lint
 lint:
 	$(GO_DOCKER_CMD) sh -c ' \
-		cd v2/exporter && \
+		cd /exporter && \
 		golangci-lint run --config ../../golangci.yaml \
 	'
 
 .PHONY: test-unit
 test-unit:
 	$(GO_DOCKER_CMD) sh -c ' \
-		cd v2/exporter && \
+		cd /exporter && \
 		go test \
 			-v \
 			-timeout=60s \
@@ -131,7 +131,7 @@ build-%:
 	$(KANIKO_DOCKER_CMD) kaniko \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg COMMIT=$(GIT_VERSION) \
-		--dockerfile /workspaces/brigade-prometheus/v2/$*/Dockerfile \
+		--dockerfile /workspaces/brigade-prometheus/$*/Dockerfile \
 		--context dir:///workspaces/brigade-prometheus/ \
 		--no-push
 
@@ -152,7 +152,7 @@ push-%:
 		kaniko \
 			--build-arg VERSION="$(VERSION)" \
 			--build-arg COMMIT="$(GIT_VERSION)" \
-			--dockerfile /workspaces/brigade-prometheus/v2/$*/Dockerfile \
+			--dockerfile /workspaces/brigade-prometheus/$*/Dockerfile \
 			--context dir:///workspaces/brigade-prometheus/ \
 			--destination $(DOCKER_IMAGE_PREFIX)$*:$(IMMUTABLE_DOCKER_TAG) \
 			--destination $(DOCKER_IMAGE_PREFIX)$*:$(MUTABLE_DOCKER_TAG) \
@@ -184,7 +184,7 @@ hack-build-images: hack-build-exporter hack-pull-grafana
 .PHONY: hack-build-%
 hack-build-%:
 	docker build \
-		-f v2/$*/Dockerfile \
+		-f $*/Dockerfile \
 		-t $(DOCKER_IMAGE_PREFIX)$*:$(VERSION) \
 		--build-arg VERSION='$(VERSION)' \
 		--build-arg COMMIT='$(GIT_VERSION)' \
