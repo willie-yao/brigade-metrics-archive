@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "brigade-prometheus.exporter.fullname" . }}
+  name: {{ include "brigade-metrics.exporter.fullname" . }}
   labels:
-    {{- include "brigade-prometheus.labels" . | nindent 4 }}
-    {{- include "brigade-prometheus.exporter.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.exporter.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
-      {{- include "brigade-prometheus.exporter.labels" . | nindent 6 }}
+      {{- include "brigade-metrics.selectorLabels" . | nindent 6 }}
+      {{- include "brigade-metrics.exporter.labels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
-        {{- include "brigade-prometheus.exporter.labels" . | nindent 8 }}
+        {{- include "brigade-metrics.selectorLabels" . | nindent 8 }}
+        {{- include "brigade-metrics.exporter.labels" . | nindent 8 }}
       annotations:
         checksum/secret: {{ include (print $.Template.BasePath "/exporter/secret.yaml") . | sha256sum }}
     spec:
@@ -29,7 +29,7 @@ spec:
         - name: API_TOKEN
           valueFrom:
             secretKeyRef:
-              name: {{ include "brigade-prometheus.exporter.fullname" . }}
+              name: {{ include "brigade-metrics.exporter.fullname" . }}
               key: api-token
         - name: API_IGNORE_CERT_WARNINGS
           value: {{ quote .Values.exporter.brigade.ignoreCertWarnings }}

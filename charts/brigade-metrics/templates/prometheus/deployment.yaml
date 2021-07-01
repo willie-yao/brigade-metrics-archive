@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+  name: {{ include "brigade-metrics.prometheus.fullname" . }}
   labels:
-    {{- include "brigade-prometheus.labels" . | nindent 4 }}
-    {{- include "brigade-prometheus.prometheus.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.prometheus.labels" . | nindent 4 }}
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
-      {{- include "brigade-prometheus.prometheus.labels" . | nindent 6 }}
+      {{- include "brigade-metrics.selectorLabels" . | nindent 6 }}
+      {{- include "brigade-metrics.prometheus.labels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
-        {{- include "brigade-prometheus.prometheus.labels" . | nindent 8 }}
+        {{- include "brigade-metrics.selectorLabels" . | nindent 8 }}
+        {{- include "brigade-metrics.prometheus.labels" . | nindent 8 }}
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/prometheus/configmap.yaml") . | sha256sum }}
     spec:
@@ -38,11 +38,11 @@ spec:
       volumes:
       - name: prometheus-config-volume
         configMap:
-          name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+          name: {{ include "brigade-metrics.prometheus.fullname" . }}
       - name: data
         {{- if .Values.prometheus.persistence.enabled }}
         persistentVolumeClaim:
-          claimName: {{ include "brigade-prometheus.prometheus.fullname" . }}
+          claimName: {{ include "brigade-metrics.prometheus.fullname" . }}
         {{- else }}
         emptyDir: {}
         {{- end }}

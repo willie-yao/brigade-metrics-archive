@@ -11,11 +11,11 @@ COPY go.sum go.sum
 
 RUN go build \
   -o bin/exporter \
-  -ldflags "-w -X github.com/willie-yao/brigade-prometheus/exporter/internal/version.version=$VERSION -X github.com/willie-yao/brigade-prometheus/exporter/internal/version.commit=$COMMIT" \
+  -ldflags "-w -X github.com/willie-yao/brigade-metrics/exporter/internal/version.version=$VERSION -X github.com/willie-yao/brigade-metrics/exporter/internal/version.commit=$COMMIT" \
   ./exporter
 
 EXPOSE 80
 
 FROM scratch
-COPY --from=0 /src/bin/ /brigade-prometheus/bin/
-ENTRYPOINT ["/brigade-prometheus/bin/exporter"]
+COPY --from=0 /src/bin/ /brigade-metrics/bin/
+ENTRYPOINT ["/brigade-metrics/bin/exporter"]

@@ -1,10 +1,10 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+  name: {{ include "brigade-metrics.prometheus.fullname" . }}
   labels:
-    {{- include "brigade-prometheus.labels" . | nindent 4 }}
-    {{- include "brigade-prometheus.prometheus.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.prometheus.labels" . | nindent 4 }}
 rules:
 - apiGroups: [""]
   resources:
@@ -20,12 +20,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+  name: {{ include "brigade-metrics.prometheus.fullname" . }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+  name: {{ include "brigade-metrics.prometheus.fullname" . }}
 subjects:
 - kind: ServiceAccount
-  name: {{ include "brigade-prometheus.prometheus.fullname" . }}
+  name: {{ include "brigade-metrics.prometheus.fullname" . }}
   namespace: monitoring

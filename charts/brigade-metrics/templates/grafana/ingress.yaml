@@ -6,10 +6,10 @@ apiVersion: networking.k8s.io/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ include "brigade-prometheus.grafana.fullname" . }}
+  name: {{ include "brigade-metrics.grafana.fullname" . }}
   labels:
-    {{- include "brigade-prometheus.labels" . | nindent 4 }}
-    {{- include "brigade-prometheus.grafana.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.grafana.labels" . | nindent 4 }}
   {{- with .Values.grafana.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -24,7 +24,7 @@ spec:
         path: /
         backend:
           service:
-            name: {{ include "brigade-prometheus.grafana.fullname" . }}
+            name: {{ include "brigade-metrics.grafana.fullname" . }}
             port:
               {{- if .Values.grafana.tls.enabled }}
               number: 443
@@ -33,7 +33,7 @@ spec:
               {{- end }}
       {{- else }}
       - backend:
-          serviceName: {{ include "brigade-prometheus.grafana.fullname" . }}
+          serviceName: {{ include "brigade-metrics.grafana.fullname" . }}
           {{- if .Values.grafana.tls.enabled }}
           servicePort: 443
           {{- else }}
@@ -44,6 +44,6 @@ spec:
   tls:
   - hosts:
     - {{ .Values.grafana.host }}
-    secretName: {{ include "brigade-prometheus.grafana.fullname" . }}-ingress-cert
+    secretName: {{ include "brigade-metrics.grafana.fullname" . }}-ingress-cert
   {{- end }}
 {{- end }}

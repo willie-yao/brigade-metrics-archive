@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "brigade-prometheus.grafana.fullname" . }}
+  name: {{ include "brigade-metrics.grafana.fullname" . }}
   labels:
-    {{- include "brigade-prometheus.labels" . | nindent 4 }}
-    {{- include "brigade-prometheus.grafana.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.grafana.labels" . | nindent 4 }}
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      {{- include "brigade-prometheus.selectorLabels" . | nindent 6 }}
-      {{- include "brigade-prometheus.grafana.labels" . | nindent 6 }}
+      {{- include "brigade-metrics.selectorLabels" . | nindent 6 }}
+      {{- include "brigade-metrics.grafana.labels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
-        {{- include "brigade-prometheus.grafana.labels" . | nindent 8 }}
+        {{- include "brigade-metrics.selectorLabels" . | nindent 8 }}
+        {{- include "brigade-metrics.grafana.labels" . | nindent 8 }}
       annotations:
         checksum/configmap: {{ include (print $.Template.BasePath "/grafana/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/grafana/secret.yaml") . | sha256sum }}
@@ -43,12 +43,12 @@ spec:
         - name: GF_SECURITY_ADMIN_USER
           valueFrom:
             secretKeyRef:
-              name: {{ include "brigade-prometheus.grafana.fullname" . }}
+              name: {{ include "brigade-metrics.grafana.fullname" . }}
               key: adminUsername
         - name: GF_SECURITY_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ include "brigade-prometheus.grafana.fullname" . }}
+              name: {{ include "brigade-metrics.grafana.fullname" . }}
               key: adminPassword
         volumeMounts:
         - name: grafana-datasources
@@ -79,19 +79,19 @@ spec:
       volumes:
       - name: nginx-config
         configMap:
-          name: {{ include "brigade-prometheus.nginx.fullname" . }}
+          name: {{ include "brigade-metrics.nginx.fullname" . }}
       {{- if .Values.grafana.tls.enabled }}
       - name: cert
         secret:
-          secretName: {{ include "brigade-prometheus.grafana.fullname" . }}-cert
+          secretName: {{ include "brigade-metrics.grafana.fullname" . }}-cert
       {{- end }}
       - name: grafana-datasources
         configMap:
-          name: {{ include "brigade-prometheus.grafana.fullname" . }}-datasources
+          name: {{ include "brigade-metrics.grafana.fullname" . }}-datasources
       - name: data
         {{- if .Values.grafana.persistence.enabled }}
         persistentVolumeClaim:
-          claimName: {{ include "brigade-prometheus.grafana.fullname" . }}
+          claimName: {{ include "brigade-metrics.grafana.fullname" . }}
         {{- else }}
         emptyDir: {}
         {{- end }}

@@ -1,4 +1,4 @@
-## Default values for brigade-prometheus
+## Default values for brigade-metrics
 ## This is a YAML-formatted file.
 ## Declare variables to be passed into your templates.
 
@@ -6,7 +6,7 @@
 exporter:
 
   image:
-    repository: quillie/brigade-prometheus-exporter
+    repository: quillie/brigade-metrics-exporter
     ## tag should only be specified if you want to override Chart.appVersion
     ## The default tag is the value of .Chart.AppVersion
     # tag:
@@ -16,7 +16,7 @@ exporter:
   brigade:
     ## Address of your Brigade 2 API server, including leading protocol
     ## (http:// or https://)
-    apiAddress: https://brigade-apiserver.brigade.svc.cluster.local
+    apiAddress: https://brigade2-apiserver.brigade2.svc.cluster.local
     ## API token belonging to a Brigade 2 service account
     apiToken: <placeholder>
     ## Whether to ignore cert warning from the API server
@@ -93,7 +93,7 @@ grafana:
   host: localhost:31700
 
   image:
-    repository: quillie/brigade-prometheus-grafana
+    repository: quillie/brigade-metrics-grafana
     ## tag should only be specified if you want to override Chart.appVersion
     ## The default tag is the value of .Chart.AppVersion
     # tag:

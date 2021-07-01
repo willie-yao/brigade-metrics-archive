@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "brigade-prometheus.exporter.fullname" . }}
+  name: {{ include "brigade-metrics.exporter.fullname" . }}
   labels:
-    {{- include "brigade-prometheus.labels" . | nindent 4 }}
-    {{- include "brigade-prometheus.exporter.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.labels" . | nindent 4 }}
+    {{- include "brigade-metrics.exporter.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.exporter.service.type }}
   ports:
@@ -15,5 +15,5 @@ spec:
     {{- end }}
     protocol: TCP
   selector:
-    {{- include "brigade-prometheus.selectorLabels" . | nindent 8 }}
-    {{- include "brigade-prometheus.exporter.labels" . | nindent 8 }}
+    {{- include "brigade-metrics.selectorLabels" . | nindent 8 }}
+    {{- include "brigade-metrics.exporter.labels" . | nindent 8 }}
