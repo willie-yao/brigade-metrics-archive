@@ -1,13 +1,13 @@
-# Brigade Prometheus: One-Step Monitoring for Brigade
+# Brigade Metrics: One-Step Monitoring for Brigade
 
-Brigade Prometheus adds monitoring to a Brigade 2 installation.
+Brigade Metrics adds monitoring to a Brigade 2 installation.
 
 Brigade 2 itself is currently in an _alpha_ state and remains under heavy
 development, as such, the same is true for this add-on component.
 
-## Introducing Brigade Prometheus
+## Introducing Brigade Metrics
 
-Brigade Prometheus uses a combination of exporting metrics from Brigade 2's SDK, creating a dimensional data model from these metrics through Prometheus, and displaying the metrics to the user through Grafana's dashboard UI. Brigade Prometheus handles the provisioning and setup of all three components for any Brigade operators who wish to expose metrics to their users with a simple helm installation.
+Brigade Metrics uses a combination of exporting metrics from Brigade 2's SDK, creating a dimensional data model from these metrics through Prometheus, and displaying the metrics to the user through Grafana's dashboard UI. Brigade Metrics handles the provisioning and setup of all three components for any Brigade operators who wish to expose metrics to their users with a simple helm installation.
 
 ## Getting Started
 
@@ -48,9 +48,9 @@ $ brig role grant READER --service-account <id>
 
 Save the service account token somewhere safe.
 
-### Installing and Configuring Brigade Prometheus on a _Private_ Kubernetes Cluster
+### Installing and Configuring Brigade Metrics on a _Private_ Kubernetes Cluster
 
-Since this add-on is still in heavy development, you will need to clone this repository to install Brigade Prometheus into your local Kubernetes cluster. Once the repository is cloned, open the `values.yaml` file, and paste the service account token into the `exporter.brigade.apiToken` field.
+Since this add-on is still in heavy development, you will need to clone this repository to install Brigade Metrics into your local Kubernetes cluster. Once the repository is cloned, open the `values.yaml` file, and paste the service account token into the `exporter.brigade.apiToken` field.
 
 There are two methods of authentication you can choose from for logging into Grafana. 
 1. Option to use Grafana's built in user management system. The username and password for the admin account are specified in the `grafana.auth` fields, and the admin can handle user management using the Grafana UI.
