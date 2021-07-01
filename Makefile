@@ -23,9 +23,9 @@ ifneq ($(SKIP_DOCKER),true)
 		--rm \
 		-e SKIP_DOCKER=true \
 		-e GITHUB_TOKEN=$${GITHUB_TOKEN} \
-		-e GOCACHE=/workspaces/brigade-prometheus/.gocache \
-		-v $(PROJECT_ROOT):/workspaces/brigade-prometheus \
-		-w /workspaces/brigade-prometheus \
+		-e GOCACHE=/workspaces/brigade-metrics/.gocache \
+		-v $(PROJECT_ROOT):/workspaces/brigade-metrics \
+		-w /workspaces/brigade-metrics \
 		$(GO_DEV_IMAGE)
 
 	KANIKO_IMAGE := brigadecore/kaniko:v0.2.0
@@ -35,8 +35,8 @@ ifneq ($(SKIP_DOCKER),true)
 		--rm \
 		-e SKIP_DOCKER=true \
 		-e DOCKER_PASSWORD=$${DOCKER_PASSWORD} \
-		-v $(PROJECT_ROOT):/workspaces/brigade-prometheus \
-		-w /workspaces/brigade-prometheus \
+		-v $(PROJECT_ROOT):/workspaces/brigade-metrics \
+		-w /workspaces/brigade-metrics \
 		$(KANIKO_IMAGE)
 
 	HELM_IMAGE := brigadecore/helm-tools:v0.1.0
@@ -46,8 +46,8 @@ ifneq ($(SKIP_DOCKER),true)
 		--rm \
 		-e SKIP_DOCKER=true \
 		-e HELM_PASSWORD=$${HELM_PASSWORD} \
-		-v $(PROJECT_ROOT):/workspaces/brigade-prometheus \
-		-w /workspaces/brigade-prometheus \
+		-v $(PROJECT_ROOT):/workspaces/brigade-metrics \
+		-w /workspaces/brigade-metrics \
 		$(HELM_IMAGE)
 endif
 
@@ -63,7 +63,7 @@ ifdef DOCKER_ORG
 	DOCKER_ORG := $(DOCKER_ORG)/
 endif
 
-DOCKER_IMAGE_PREFIX := $(DOCKER_REGISTRY)$(DOCKER_ORG)brigade-prometheus-
+DOCKER_IMAGE_PREFIX := $(DOCKER_REGISTRY)$(DOCKER_ORG)brigade-metrics-
 
 ifdef HELM_REGISTRY
 	HELM_REGISTRY := $(HELM_REGISTRY)/
@@ -111,7 +111,7 @@ test-unit:
 .PHONY: lint-chart
 lint-chart:
 	$(HELM_DOCKER_CMD) sh -c ' \
-		cd charts/brigade-prometheus && \
+		cd charts/brigade-metrics && \
 		helm dep up && \
 		helm lint . \
 	'
@@ -131,8 +131,8 @@ build-%:
 	$(KANIKO_DOCKER_CMD) kaniko \
 		--build-arg VERSION=$(VERSION) \
 		--build-arg COMMIT=$(GIT_VERSION) \
-		--dockerfile /workspaces/brigade-prometheus/$*/Dockerfile \
-		--context dir:///workspaces/brigade-prometheus/ \
+		--dockerfile /workspaces/brigade-metrics/$*/Dockerfile \
+		--context dir:///workspaces/brigade-metrics/ \
 		--no-push
 
 ################################################################################
@@ -152,8 +152,8 @@ push-%:
 		kaniko \
 			--build-arg VERSION="$(VERSION)" \
 			--build-arg COMMIT="$(GIT_VERSION)" \
-			--dockerfile /workspaces/brigade-prometheus/$*/Dockerfile \
-			--context dir:///workspaces/brigade-prometheus/ \
+			--dockerfile /workspaces/brigade-metrics/$*/Dockerfile \
+			--context dir:///workspaces/brigade-metrics/ \
 			--destination $(DOCKER_IMAGE_PREFIX)$*:$(IMMUTABLE_DOCKER_TAG) \
 			--destination $(DOCKER_IMAGE_PREFIX)$*:$(MUTABLE_DOCKER_TAG) \
 	'
@@ -162,12 +162,12 @@ push-%:
 publish-chart:
 	$(HELM_DOCKER_CMD) sh	-c ' \
 		helm registry login $(HELM_REGISTRY) -u $(HELM_USERNAME) -p $${HELM_PASSWORD} && \
-		cd charts/brigade-prometheus && \
+		cd charts/brigade-metrics && \
 		helm dep up && \
 		sed -i "s/^version:.*/version: $(VERSION)/" Chart.yaml && \
 		sed -i "s/^appVersion:.*/appVersion: $(VERSION)/" Chart.yaml && \
-		helm chart save . $(HELM_CHART_PREFIX)brigade-prometheus:$(VERSION) && \
-		helm chart push $(HELM_CHART_PREFIX)brigade-prometheus:$(VERSION) \
+		helm chart save . $(HELM_CHART_PREFIX)brigade-metrics:$(VERSION) && \
+		helm chart push $(HELM_CHART_PREFIX)brigade-metrics:$(VERSION) \
 	'
 
 ################################################################################
@@ -201,11 +201,11 @@ IMAGE_PULL_POLICY ?= Always
 
 .PHONY: hack-deploy
 hack-deploy:
-	helm dep up charts/brigade-prometheus && \
-	helm upgrade brigade-prometheus charts/brigade-prometheus \
+	helm dep up charts/brigade-metrics && \
+	helm upgrade brigade-metrics charts/brigade-metrics \
 		--install \
 		--create-namespace \
-		--namespace brigade-prometheus \
+		--namespace brigade-metrics \
 		--wait \
 		--timeout 30s \
 		--set exporter.image.repository=$(DOCKER_IMAGE_PREFIX)exporter \

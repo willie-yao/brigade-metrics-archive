@@ -1,4 +1,4 @@
-module github.com/willie-yao/brigade-prometheus
+module github.com/willie-yao/brigade-metrics
 
 go 1.16
 
