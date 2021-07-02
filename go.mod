@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/brigadecore/brigade/sdk/v2 v2.0.0-alpha.5
+	github.com/gorilla/mux v1.8.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pkg/errors v0.9.1

@@ -91,14 +91,14 @@ IMMUTABLE_DOCKER_TAG := $(VERSION)
 .PHONY: lint
 lint:
 	$(GO_DOCKER_CMD) sh -c ' \
-		cd /exporter && \
-		golangci-lint run --config ../../golangci.yaml \
+		cd exporter && \
+		golangci-lint run --config ../golangci.yaml \
 	'
 
 .PHONY: test-unit
 test-unit:
 	$(GO_DOCKER_CMD) sh -c ' \
-		cd /exporter && \
+		cd exporter && \
 		go test \
 			-v \
 			-timeout=60s \
