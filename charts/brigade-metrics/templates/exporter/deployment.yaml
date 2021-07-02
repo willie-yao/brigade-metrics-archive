@@ -32,7 +32,7 @@ spec:
               name: {{ include "brigade-metrics.exporter.fullname" . }}
               key: api-token
         - name: API_IGNORE_CERT_WARNINGS
-          value: {{ quote .Values.exporter.brigade.ignoreCertWarnings }}
+          value: {{ quote .Values.exporter.brigade.apiIgnoreCertWarnings }}
         - name: PROM_SCRAPE_INTERVAL
           value: {{ quote .Values.prometheus.scrapeInterval }}
       {{- with .Values.exporter.nodeSelector }}

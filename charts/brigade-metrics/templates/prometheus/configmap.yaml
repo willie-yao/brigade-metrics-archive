@@ -17,7 +17,7 @@ data:
     - job_name: 'node-exporter'
 
       # Override the global default and scrape targets from this job every 5 seconds.
-      scrape_interval: {{ .Values.prometheus.scrapeInterval }}s
+      scrape_interval: {{ .Values.prometheus.scrapeInterval }}
 
       static_configs:
       - targets:

@@ -53,7 +53,7 @@ prometheus:
     tag: v2.28.0
     pullPolicy: IfNotPresent
 
-  scrapeInterval: 3
+  scrapeInterval: 3s
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as
