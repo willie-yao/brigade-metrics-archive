@@ -44,7 +44,7 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 7,
+        "w": 8,
         "x": 0,
         "y": 0
       },
@@ -52,6 +52,10 @@
       "interval": "5s",
       "maxDataPoints": null,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -59,9 +63,8 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "text": {},
+        "textMode": "auto"
       },
       "pluginVersion": "8.0.2",
       "targets": [
@@ -75,7 +78,7 @@
       ],
       "timeFrom": "5s",
       "title": "All Running Workers Duration",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": null,
@@ -85,72 +88,13 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "max": 1e+43,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 7,
-        "y": 0
-      },
-      "id": 34,
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "8.0.2",
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(sum_over_time(brigade_all_running_workers_duration[15m])) / sum(count_over_time(brigade_all_running_workers_duration[15m]))",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Average Worker Duration Last 15m",
-      "type": "gauge"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -159,13 +103,17 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 8,
-        "x": 10,
+        "w": 10,
+        "x": 8,
         "y": 0
       },
       "id": 14,
       "interval": "5s",
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -173,9 +121,8 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "text": {},
+        "textMode": "auto"
       },
       "pluginVersion": "8.0.2",
       "targets": [
@@ -188,8 +135,8 @@
         }
       ],
       "timeFrom": null,
-      "title": "All Workers By Phase",
-      "type": "gauge"
+      "title": "Events by Worker Phase",
+      "type": "stat"
     },
     {
       "datasource": null,
@@ -224,6 +171,10 @@
       },
       "id": 32,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -231,9 +182,8 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "text": {},
+        "textMode": "auto"
       },
       "pluginVersion": "8.0.2",
       "targets": [
@@ -246,63 +196,7 @@
         }
       ],
       "title": "Total Brigade Projects",
-      "type": "gauge"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 7,
-        "y": 5
-      },
-      "id": 35,
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "8.0.2",
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(sum_over_time(brigade_all_running_workers_duration[30m])) / sum(count_over_time(brigade_all_running_workers_duration[30m]))",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Average Worker Duration Last 30m",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": null,
@@ -336,6 +230,10 @@
       },
       "id": 22,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -343,9 +241,8 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "text": {},
+        "textMode": "auto"
       },
       "pluginVersion": "8.0.2",
       "targets": [
@@ -358,7 +255,7 @@
         }
       ],
       "title": "Total Users",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": null,
@@ -392,6 +289,9 @@
       },
       "id": 2,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -400,9 +300,8 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "text": {},
+        "textMode": "auto"
       },
       "pluginVersion": "8.0.2",
       "targets": [
@@ -415,7 +314,7 @@
         }
       ],
       "title": "Current Running Jobs",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": null,
@@ -530,6 +429,10 @@
       },
       "id": 30,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -537,9 +440,8 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "text": {},
+        "textMode": "auto"
       },
       "pluginVersion": "8.0.2",
       "targets": [
@@ -552,7 +454,7 @@
         }
       ],
       "title": "Total Service Accounts",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": null,
@@ -586,6 +488,10 @@
       },
       "id": 26,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -593,9 +499,8 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "text": {},
+        "textMode": "auto"
       },
       "pluginVersion": "8.0.2",
       "targets": [
@@ -608,7 +513,7 @@
         }
       ],
       "title": "Current Pending Jobs",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": null,
@@ -723,6 +628,10 @@
       },
       "id": 24,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -730,9 +639,8 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
+        "text": {},
+        "textMode": "auto"
       },
       "pluginVersion": "8.0.2",
       "targets": [
@@ -745,7 +653,7 @@
         }
       ],
       "title": "Current Pending Workers",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": null,
