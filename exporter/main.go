@@ -43,7 +43,7 @@ func main() {
 	{
 		router := mux.NewRouter()
 		router.StrictSlash(true)
-		router.Handle("/events", promhttp.Handler()).Methods(http.MethodPost)
+		router.Handle("/metrics", promhttp.Handler()).Methods(http.MethodGet)
 		router.HandleFunc("/healthz", system.Healthz).Methods(http.MethodGet)
 		serverConfig, err := serverConfig()
 		if err != nil {
