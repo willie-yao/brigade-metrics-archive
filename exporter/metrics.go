@@ -109,10 +109,6 @@ func recordMetrics(client sdk.APIClient) {
 						jobsList = append(jobsList, job)
 					}
 				}
-			} else {
-				allRunningWorkersDuration.Delete(
-					prometheus.Labels{"worker": worker.ID},
-				)
 			}
 		}
 
