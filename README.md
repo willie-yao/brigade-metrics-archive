@@ -1,56 +1,42 @@
-# Brigade Metrics: One-Step Monitoring for Brigade
+# Brigade Metrics: One-Step Monitoring for Brigade 2
 
-Brigade Metrics adds monitoring to a Brigade 2 installation.
+Brigade Metrics adds monitoring capabilities to a Brigade 2 installation. It
+utilizes Brigade APIs to export time series metrics to Prometheus and makes
+visualizations of those metrics available through a Grafana dashboard.
 
-Brigade 2 itself is currently in an _alpha_ state and remains under heavy
+Brigade 2 itself is currently in an _beta_ state and remains under active
 development, as such, the same is true for this add-on component.
-
-## Introducing Brigade Metrics
-
-Brigade Metrics uses a combination of exporting metrics from Brigade 2's SDK, creating a dimensional data model from these metrics through Prometheus, and displaying the metrics to the user through Grafana's dashboard UI. Brigade Metrics handles the provisioning and setup of all three components for any Brigade operators who wish to expose metrics to their users with a simple helm installation.
 
 ## Getting Started
 
-Comprehensive documentation will become available in conjunction with a beta
+Comprehensive documentation will become available in conjunction with a future
 release. In the meantime, here is a little to get you started.
 
-### Installing and Configuring Brigade 2 on a _Private_ Kubernetes Cluster
+### Prerequisites
 
-This project has a major dependency on Brigade 2, and requires a full installation of Brigade 2 to function. Install Brigade 2 with _default_ configuration:
+Since Brigade Metrics aggregates and exposes metrics for a running Brigade 2
+installation, an operation Brigade 2 beta installation is a prerequisite. Please
+refer to
+[Brigade 2's own getting started documentation](https://github.com/brigadecore/brigade/tree/v2).
 
-```console
-$ export HELM_EXPERIMENTAL_OCI=1
-$ helm chart pull ghcr.io/brigadecore/brigade:v2.0.0-alpha.5
-$ helm chart export ghcr.io/brigadecore/brigade:v2.0.0-alpha.5 -d ~/charts
-$ kubectl create namespace brigade2
-$ helm install brigade2 ~/charts/brigade --namespace brigade2
-```
-
-Expose the API server on your local cluster:
+Once Brigade 2 is up and running, create a service account, and give it `READ`
+permissions:
 
 ```console
-$ kubectl --namespace brigade2 port-forward service/brigade2-apiserver 8443:443 &>/dev/null &
-```
-
-Log in as the "root" user, using the default root password `F00Bar!!!`. Be sure
-to use the `-k` option to disregard issues with the self-signed certificate.
-
-```console
-$ brig login -k --server https://localhost:8443 --root
-```
-
-Once Brigade 2 is up and running on your cluster, create a service account, and give it READ permissions:
-
-```console
-$ brig sa create -i <id> -d <description>
-$ brig role grant READER --service-account <id>
+$ brig sa create -i brigade-metrics -d brigade-metrics
+$ brig role grant READER --service-account brigade-metrics
 ```
 
 Save the service account token somewhere safe.
 
-### Installing and Configuring Brigade Metrics on a _Private_ Kubernetes Cluster
+### Installing Brigade Metrics
 
-Since this add-on is still in heavy development, you will need to clone this repository to install Brigade Metrics into your local Kubernetes cluster. Once the repository is cloned, open the `values.yaml` file, and paste the service account token into the `exporter.brigade.apiToken` field.
+Since this add-on is still very much a prototype, we're not currently publishing
+a Helm chart anywhere. You will need to clone this repository to obtain the
+chart and install.
+
+Once the repository is cloned, open the `values.yaml` file, and paste the
+service account token into the `exporter.brigade.apiToken` field.
 
 There are two methods of authentication you can choose from for logging into Grafana. 
 1. Option to use Grafana's built in user management system. The username and password for the admin account are specified in the `grafana.auth` fields, and the admin can handle user management using the Grafana UI.
