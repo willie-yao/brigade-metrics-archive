@@ -32,11 +32,10 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		go recordMetricsLoop(
-			ctx,
+		go newMetricsExporter(
 			sdk.NewAPIClient(address, token, &opts),
 			time.Duration(scrapeInterval),
-		)
+		).run(ctx)
 	}
 
 	var server libHTTP.Server
