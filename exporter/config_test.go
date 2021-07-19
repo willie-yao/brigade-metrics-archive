@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/brigadecore/brigade/sdk/v2/restmachinery"
-	clientRM "github.com/brigadecore/brigade/sdk/v2/restmachinery"
 	"github.com/stretchr/testify/require"
 	"github.com/willie-yao/brigade-metrics/exporter/internal/http"
 )
@@ -22,7 +21,7 @@ func TestAPIClientConfig(t *testing.T) {
 		assertions func(
 			address string,
 			token string,
-			opts clientRM.APIClientOptions,
+			opts restmachinery.APIClientOptions,
 			err error,
 		)
 	}{
@@ -32,7 +31,7 @@ func TestAPIClientConfig(t *testing.T) {
 			assertions: func(
 				_ string,
 				_ string,
-				_ clientRM.APIClientOptions,
+				_ restmachinery.APIClientOptions,
 				err error,
 			) {
 				require.Error(t, err)
@@ -57,7 +56,7 @@ func TestAPIClientConfig(t *testing.T) {
 			},
 		},
 		{
-			name: "SUCCESS not set",
+			name: "success",
 			setup: func() {
 				os.Setenv("API_TOKEN", "bar")
 				os.Setenv("API_IGNORE_CERT_WARNINGS", "true")
