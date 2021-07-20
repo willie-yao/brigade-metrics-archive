@@ -149,8 +149,18 @@ func (m *metricsExporter) recordMetrics() {
 		// all the running workers.
 		var countError error
 		if phase == core.WorkerPhaseRunning {
-			pendingJobs := countJobStatus(events, core.JobPhasePending)
-			for events.Continue != "" {
+			var pendingJobs int
+			for {
+				for _, event := range events.Items {
+					for _, job := range event.Worker.Jobs {
+						if job.Status.Phase == core.JobPhasePending {
+							pendingJobs++
+						}
+					}
+				}
+				if events.Continue == "" {
+					break
+				}
 				events, countError = m.apiClient.Core().Events().List(
 					context.Background(),
 					&core.EventsSelector{
@@ -161,11 +171,6 @@ func (m *metricsExporter) recordMetrics() {
 				if countError != nil {
 					log.Println(countError)
 					break
-				} else {
-					pendingJobs += countJobStatus(
-						events,
-						core.JobPhasePending,
-					)
 				}
 			}
 			if countError == nil {
@@ -174,18 +179,4 @@ func (m *metricsExporter) recordMetrics() {
 		}
 	}
 
-}
-
-// countJobStatus takes in an eventlist and a matching job phase, and returns
-// the number of jobs for the current event page that matches the phase
-func countJobStatus(list core.EventList, phase core.JobPhase) int {
-	counter := 0
-	for _, event := range list.Items {
-		for _, job := range event.Worker.Jobs {
-			if job.Status.Phase == phase {
-				counter++
-			}
-		}
-	}
-	return counter
 }
