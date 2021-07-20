@@ -85,10 +85,11 @@ func (m *metricsExporter) recordMetrics() {
 		&meta.ListOptions{},
 	)
 	if err != nil {
-		log.Fatal(err) // TODO: Let's not crash every time there's an error
+		log.Println(err)
+	} else {
+		m.totalProjects.Set(float64(len(projects.Items) +
+			int(projects.RemainingItemCount)))
 	}
-	m.totalProjects.Set(float64(len(projects.Items) +
-		int(projects.RemainingItemCount)))
 
 	// brigade_users_total
 	users, err := m.apiClient.Authn().Users().List(
@@ -97,10 +98,11 @@ func (m *metricsExporter) recordMetrics() {
 		&meta.ListOptions{},
 	)
 	if err != nil {
-		log.Fatal(err) // TODO: Let's not crash every time there's an error
+		log.Println(err)
+	} else {
+		m.totalUsers.Set(float64(len(users.Items) +
+			int(users.RemainingItemCount)))
 	}
-	m.totalUsers.Set(float64(len(users.Items) +
-		int(users.RemainingItemCount)))
 
 	// brigade_service_accounts_total
 	serviceAccounts, err := m.apiClient.Authn().ServiceAccounts().List(
@@ -109,17 +111,20 @@ func (m *metricsExporter) recordMetrics() {
 		&meta.ListOptions{},
 	)
 	if err != nil {
-		log.Fatal(err) // TODO: Let's not crash every time there's an error
+		log.Println(err)
+	} else {
+		m.totalServiceAccounts.Set(
+			float64(
+				len(serviceAccounts.Items) +
+					int(serviceAccounts.RemainingItemCount),
+			),
+		)
 	}
-	m.totalServiceAccounts.Set(
-		float64(
-			len(serviceAccounts.Items) + int(serviceAccounts.RemainingItemCount),
-		),
-	)
 
 	// brigade_all_workers_by_phase
 	for _, phase := range core.WorkerPhasesAll() {
-		events, err := m.apiClient.Core().Events().List(
+		var events core.EventList
+		events, err = m.apiClient.Core().Events().List(
 			context.Background(),
 			&core.EventsSelector{
 				WorkerPhases: []core.WorkerPhase{phase},
@@ -127,11 +132,13 @@ func (m *metricsExporter) recordMetrics() {
 			&meta.ListOptions{},
 		)
 		if err != nil {
-			log.Fatal(err) // TODO: Let's not crash every time there's an error
+			log.Println(err)
+		} else {
+			m.allWorkersByPhase.With(
+				prometheus.Labels{"workerPhase": string(phase)},
+			).Set(float64(len(events.Items) + int(events.RemainingItemCount)))
 		}
-		m.allWorkersByPhase.With(
-			prometheus.Labels{"workerPhase": string(phase)},
-		).Set(float64(len(events.Items) + int(events.RemainingItemCount)))
+
 		// brigade_pending_jobs_total
 		//
 		// There is no way to query the API directly for pending Jobs, but only
@@ -143,17 +150,31 @@ func (m *metricsExporter) recordMetrics() {
 		// all the running workers.
 		if phase == core.WorkerPhaseRunning {
 			var pendingJobs int
-			// TODO: This logic doesn't currently account for the possibility that
-			// there are more pages of events with running workers, so this count
-			// of pending jobs could be wrong.
-			for _, event := range events.Items {
-				for _, job := range event.Worker.Jobs {
-					if job.Status.Phase == core.JobPhasePending {
-						pendingJobs++
+			for {
+				for _, event := range events.Items {
+					for _, job := range event.Worker.Jobs {
+						if job.Status.Phase == core.JobPhasePending {
+							pendingJobs++
+						}
 					}
 				}
+				if events.Continue == "" {
+					break
+				}
+				if events, err = m.apiClient.Core().Events().List(
+					context.Background(),
+					&core.EventsSelector{
+						WorkerPhases: []core.WorkerPhase{phase},
+					},
+					&meta.ListOptions{Continue: events.Continue},
+				); err != nil {
+					log.Println(err)
+					break
+				}
 			}
-			m.totalPendingJobs.Set(float64(pendingJobs))
+			if err == nil {
+				m.totalPendingJobs.Set(float64(pendingJobs))
+			}
 		}
 	}
 
