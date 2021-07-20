@@ -123,7 +123,8 @@ func (m *metricsExporter) recordMetrics() {
 
 	// brigade_all_workers_by_phase
 	for _, phase := range core.WorkerPhasesAll() {
-		events, err := m.apiClient.Core().Events().List(
+		var events core.EventList
+		events, err = m.apiClient.Core().Events().List(
 			context.Background(),
 			&core.EventsSelector{
 				WorkerPhases: []core.WorkerPhase{phase},
@@ -147,7 +148,6 @@ func (m *metricsExporter) recordMetrics() {
 		// concurrently, so we assume that as long as that cap isn't enormous (which
 		// would only occur on an enormous cluster), it's practical to iterate over
 		// all the running workers.
-		var countError error
 		if phase == core.WorkerPhaseRunning {
 			var pendingJobs int
 			for {
@@ -161,19 +161,18 @@ func (m *metricsExporter) recordMetrics() {
 				if events.Continue == "" {
 					break
 				}
-				events, countError = m.apiClient.Core().Events().List(
+				if events, err = m.apiClient.Core().Events().List(
 					context.Background(),
 					&core.EventsSelector{
 						WorkerPhases: []core.WorkerPhase{phase},
 					},
 					&meta.ListOptions{Continue: events.Continue},
-				)
-				if countError != nil {
-					log.Println(countError)
+				); err != nil {
+					log.Println(err)
 					break
 				}
 			}
-			if countError == nil {
+			if err == nil {
 				m.totalPendingJobs.Set(float64(pendingJobs))
 			}
 		}
