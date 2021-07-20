@@ -85,10 +85,11 @@ func (m *metricsExporter) recordMetrics() {
 		&meta.ListOptions{},
 	)
 	if err != nil {
-		log.Println(err) // TODO: Is this the best way to deal with errors?
+		log.Println(err)
+	} else {
+		m.totalProjects.Set(float64(len(projects.Items) +
+			int(projects.RemainingItemCount)))
 	}
-	m.totalProjects.Set(float64(len(projects.Items) +
-		int(projects.RemainingItemCount)))
 
 	// brigade_users_total
 	users, err := m.apiClient.Authn().Users().List(
@@ -97,10 +98,11 @@ func (m *metricsExporter) recordMetrics() {
 		&meta.ListOptions{},
 	)
 	if err != nil {
-		log.Println(err) // TODO: Is this the best way to deal with errors?
+		log.Println(err)
+	} else {
+		m.totalUsers.Set(float64(len(users.Items) +
+			int(users.RemainingItemCount)))
 	}
-	m.totalUsers.Set(float64(len(users.Items) +
-		int(users.RemainingItemCount)))
 
 	// brigade_service_accounts_total
 	serviceAccounts, err := m.apiClient.Authn().ServiceAccounts().List(
@@ -109,13 +111,15 @@ func (m *metricsExporter) recordMetrics() {
 		&meta.ListOptions{},
 	)
 	if err != nil {
-		log.Println(err) // TODO: Is this the best way to deal with errors?
+		log.Println(err)
+	} else {
+		m.totalServiceAccounts.Set(
+			float64(
+				len(serviceAccounts.Items) +
+					int(serviceAccounts.RemainingItemCount),
+			),
+		)
 	}
-	m.totalServiceAccounts.Set(
-		float64(
-			len(serviceAccounts.Items) + int(serviceAccounts.RemainingItemCount),
-		),
-	)
 
 	// brigade_all_workers_by_phase
 	for _, phase := range core.WorkerPhasesAll() {
@@ -127,11 +131,13 @@ func (m *metricsExporter) recordMetrics() {
 			&meta.ListOptions{},
 		)
 		if err != nil {
-			log.Println(err) // TODO: Is this the best way to deal with errors?
+			log.Println(err)
+		} else {
+			m.allWorkersByPhase.With(
+				prometheus.Labels{"workerPhase": string(phase)},
+			).Set(float64(len(events.Items) + int(events.RemainingItemCount)))
 		}
-		m.allWorkersByPhase.With(
-			prometheus.Labels{"workerPhase": string(phase)},
-		).Set(float64(len(events.Items) + int(events.RemainingItemCount)))
+
 		// brigade_pending_jobs_total
 		//
 		// There is no way to query the API directly for pending Jobs, but only
@@ -141,29 +147,45 @@ func (m *metricsExporter) recordMetrics() {
 		// concurrently, so we assume that as long as that cap isn't enormous (which
 		// would only occur on an enormous cluster), it's practical to iterate over
 		// all the running workers.
+		var countError error
 		if phase == core.WorkerPhaseRunning {
-			var pendingJobs int
+			pendingJobs := countJobStatus(events, core.JobPhasePending)
 			for events.Continue != "" {
-				events, err = m.apiClient.Core().Events().List(
+				events, countError = m.apiClient.Core().Events().List(
 					context.Background(),
 					&core.EventsSelector{
 						WorkerPhases: []core.WorkerPhase{phase},
 					},
 					&meta.ListOptions{Continue: events.Continue},
 				)
-				if err != nil {
-					log.Println(err) // TODO: Is this the best way to deal with errors?
-				}
-				for _, event := range events.Items {
-					for _, job := range event.Worker.Jobs {
-						if job.Status.Phase == core.JobPhasePending {
-							pendingJobs++
-						}
-					}
+				if countError != nil {
+					log.Println(countError)
+					break
+				} else {
+					pendingJobs += countJobStatus(
+						events,
+						core.JobPhasePending,
+					)
 				}
 			}
-			m.totalPendingJobs.Set(float64(pendingJobs))
+			if countError == nil {
+				m.totalPendingJobs.Set(float64(pendingJobs))
+			}
 		}
 	}
 
+}
+
+// countJobStatus takes in an eventlist and a matching job phase, and returns
+// the number of jobs for the current event page that matches the phase
+func countJobStatus(list core.EventList, phase core.JobPhase) int {
+	counter := 0
+	for _, event := range list.Items {
+		for _, job := range event.Worker.Jobs {
+			if job.Status.Phase == phase {
+				counter++
+			}
+		}
+	}
+	return counter
 }
