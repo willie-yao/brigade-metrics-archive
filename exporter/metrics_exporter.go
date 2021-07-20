@@ -85,7 +85,7 @@ func (m *metricsExporter) recordMetrics() {
 		&meta.ListOptions{},
 	)
 	if err != nil {
-		log.Fatal(err) // TODO: Let's not crash every time there's an error
+		log.Println(err) // TODO: Is this the best way to deal with errors?
 	}
 	m.totalProjects.Set(float64(len(projects.Items) +
 		int(projects.RemainingItemCount)))
@@ -97,7 +97,7 @@ func (m *metricsExporter) recordMetrics() {
 		&meta.ListOptions{},
 	)
 	if err != nil {
-		log.Fatal(err) // TODO: Let's not crash every time there's an error
+		log.Println(err) // TODO: Is this the best way to deal with errors?
 	}
 	m.totalUsers.Set(float64(len(users.Items) +
 		int(users.RemainingItemCount)))
@@ -109,7 +109,7 @@ func (m *metricsExporter) recordMetrics() {
 		&meta.ListOptions{},
 	)
 	if err != nil {
-		log.Fatal(err) // TODO: Let's not crash every time there's an error
+		log.Println(err) // TODO: Is this the best way to deal with errors?
 	}
 	m.totalServiceAccounts.Set(
 		float64(
@@ -127,7 +127,7 @@ func (m *metricsExporter) recordMetrics() {
 			&meta.ListOptions{},
 		)
 		if err != nil {
-			log.Fatal(err) // TODO: Let's not crash every time there's an error
+			log.Println(err) // TODO: Is this the best way to deal with errors?
 		}
 		m.allWorkersByPhase.With(
 			prometheus.Labels{"workerPhase": string(phase)},
@@ -143,13 +143,22 @@ func (m *metricsExporter) recordMetrics() {
 		// all the running workers.
 		if phase == core.WorkerPhaseRunning {
 			var pendingJobs int
-			// TODO: This logic doesn't currently account for the possibility that
-			// there are more pages of events with running workers, so this count
-			// of pending jobs could be wrong.
-			for _, event := range events.Items {
-				for _, job := range event.Worker.Jobs {
-					if job.Status.Phase == core.JobPhasePending {
-						pendingJobs++
+			for events.Continue != "" {
+				events, err = m.apiClient.Core().Events().List(
+					context.Background(),
+					&core.EventsSelector{
+						WorkerPhases: []core.WorkerPhase{phase},
+					},
+					&meta.ListOptions{Continue: events.Continue},
+				)
+				if err != nil {
+					log.Println(err) // TODO: Is this the best way to deal with errors?
+				}
+				for _, event := range events.Items {
+					for _, job := range event.Worker.Jobs {
+						if job.Status.Phase == core.JobPhasePending {
+							pendingJobs++
+						}
 					}
 				}
 			}
